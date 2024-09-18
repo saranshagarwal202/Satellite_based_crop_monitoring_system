@@ -37,7 +37,7 @@ api_key: "planet_developer_api_key" # [Dev Comment]: This needs to be stored as 
 
 Run the script with the configuration file:
 ```bash
-python download_image.py --config config.yaml
+python image_downloader.py --config config.yaml
 ```
 
 The script will:
@@ -50,7 +50,7 @@ Files are saved with the image item’s ID as the filename.
 ## Example
 
 ```bash
-python download_image.py --config config.yaml
+python image_downloader.py --config config.yaml
 ```
 
 ## Notes
