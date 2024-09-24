@@ -131,16 +131,13 @@ def __download_image(image_id, asset_type="ortho_visual"):
         return None
 
 
-def __run_scene_downloader(image_ids, image_queue, queue_size=10):
+def __run_scene_downloader(image_ids, image_queue):
     try:
         # Download images into queue
         for image_id in image_ids:
-            if image_queue.qsize() >= queue_size:
-                image_queue.join()  
-
             image_data = __download_image(image_id)
             if image_data:
-                image_queue.put_nowait(image_data)
+                image_queue.put_nowait((image_id, image_data))
         
         # Return True if all downloads succeed
         image_queue.put_nowait("eos") # eos represents end of stream 

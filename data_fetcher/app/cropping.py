@@ -11,7 +11,7 @@ def cropping(tif_src: rasterio.io.DatasetReader, AOI_points: list, AOI_coordinat
         src_crs = pyproj.CRS(AOI_coordinates_format)
         tgt_crs = pyproj.CRS('EPSG:32614')
         transformer = pyproj.Transformer.from_crs(src_crs, tgt_crs, always_xy=True)
-        AOI_coordinates_format = [transformer.transform(x, y) for x,y in AOI_coordinates_format]
+        AOI_points = [transformer.transform(x, y) for x,y in AOI_points]
 
     poly = Polygon(AOI_points)
     out_image, out_transform = mask(tif_src, [poly], crop=True)

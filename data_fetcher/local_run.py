@@ -26,25 +26,35 @@ def run_downloader(config: dict, output_dir: str):
         thread.start()
         
         # Processing and sending images to data manager
-        
+        i = 0
         while eot_received:
             try:
-                scene = queue.get_nowait()
+                image_id, scene = queue.get_nowait()
                 if isinstance(scene, str):
                     eot_received=False
+                    continue
                 if time()-st>24*60*60:
                     raise TimeoutError(f"job_id: {config['job_id']} user_id: {config['user_id']} : Exiting thread after 24hrs run.")
             except Empty:
                 sleep(30)
+                continue
+            scene = rasterio.MemoryFile(scene)
+            scene = rasterio.open(scene, mode='rb')
+            cropped_imag, transform = cropping(tif_src=scene, AOI_points=config["aoi"])
             
-            cropped_image = cropping(tif_src=scene, AOI_points=config["aoi"])
 
             # Add a step for checking for cloud
 
             # dumping cropped image
-            print("Dump rasterio here")
+            profile = scene.profile
+            profile.update(transform = transform,
+                           width = cropped_imag.shape[1],
+                           height = cropped_imag.shape[2]
+                           )
+            with rasterio.open(os.path.join(output_dir, f"{image_id}_cropped.tif"), 'w', **profile) as f:
+                f.write(cropped_imag.astype(rasterio.uint8))
+            i+=1
 
-        
         logger.info(f"Finished processing request for user:{config['user_id']}")
         return
     except Exception as e:
@@ -75,6 +85,9 @@ if __name__ == "__main__":
     else:
         assert isinstance(os.environ.get("PLANET_API_KEY"), str)
         api_key = os.environ.get("PLANET_API_KEY")
+    
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
     
     config = {
         "job_id": os.P_PID,
