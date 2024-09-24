@@ -5,11 +5,13 @@ Given date range, aoi_polygon, and cloud cover range, populates scenes into the 
 import requests
 import time
 import os
+from queue import Queue
 
-PLANET_API_KEY = os.getenv("PLANET_API_KEY")
+PLANET_API_KEY = None
 
 def __get_auth_headers():
-    headers = {'Authorization': f'api-key {API_KEY}'}
+    headers = {'Authorization': f'api-key {PLANET_API_KEY}'}
+    return headers
 
 def __generate_search_filter(start_date, end_date, aoi_polygon, cloud_cover, item_types):
     search_filter = {
@@ -20,7 +22,8 @@ def __generate_search_filter(start_date, end_date, aoi_polygon, cloud_cover, ite
                 {
                     "type": "GeometryFilter",
                     "field_name": "geometry",
-                    "config": aoi_polygon
+                    "config": {"type": "Polygon",
+                    "coordinates": [aoi_polygon]}
                 },
                 {
                     "type": "RangeFilter",
@@ -137,9 +140,10 @@ def __run_scene_downloader(image_ids, image_queue, queue_size=10):
 
             image_data = __download_image(image_id)
             if image_data:
-                image_queue.put(image_data)
+                image_queue.put_nowait(image_data)
         
         # Return True if all downloads succeed
+        image_queue.put_nowait("eos") # eos represents end of stream 
         return True
 
     except Exception as e:
@@ -149,13 +153,19 @@ def __run_scene_downloader(image_ids, image_queue, queue_size=10):
 
 
 def download_scenes_to_queue(
-        start_date,
-        end_date,
-        aoi_polygon,
-        cloud_cover, # Tuple. Eg. (0.1, 0.5), edge values inclusive. 
-        image_queue
+        start_date: str, # format YYYY-MM-DD
+        end_date: str, # format YYYY-MM-DD
+        aoi_polygon: list,
+        cloud_cover: tuple, # Tuple. Eg. (0.1, 0.5), edge values inclusive. 
+        image_queue: Queue,
+        api_key: str = None
 ):
+    if not api_key:
+        globals()["PLANET_API_KEY"] = os.getenv("PLANET_API_KEY")
+    else:
+        globals()["PLANET_API_KEY"] = api_key
     image_ids = __search_for_scenes(start_date, end_date, aoi_polygon, cloud_cover)
     task_completion_status = __run_scene_downloader(image_ids, image_queue)
-
+    
+        
     return task_completion_status

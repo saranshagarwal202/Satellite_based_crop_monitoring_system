@@ -164,3 +164,4 @@ cython_debug/
 .devcontainer/
 app/test.ipynb
 test/*.tif
+.vscode/
