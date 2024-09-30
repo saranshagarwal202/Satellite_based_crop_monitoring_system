@@ -140,7 +140,7 @@ def __run_scene_downloader(image_ids, image_queue):
                 image_queue.put_nowait((image_id, image_data))
         
         # Return True if all downloads succeed
-        image_queue.put_nowait("eos") # eos represents end of stream 
+        image_queue.put_nowait(("eos", "eos")) # eos represents end of stream 
         return True
 
     except Exception as e:

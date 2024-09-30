@@ -8,6 +8,7 @@ from json import loads
 import os
 from app.scene_downloading import download_scenes_to_queue
 from app.cropping import cropping
+from app.cloud_check import check_for_clouds
 
 def run_downloader(config: dict, output_dir: str):
     try:
@@ -44,6 +45,10 @@ def run_downloader(config: dict, output_dir: str):
             
 
             # Add a step for checking for cloud
+            cloud_check = check_for_clouds(cropped_imag)
+            if not cloud_check:
+                logger.info(f"{config['user_id']} Not including cloudy image for image id {image_id}")
+                continue
 
             # dumping cropped image
             profile = scene.profile
@@ -61,8 +66,6 @@ def run_downloader(config: dict, output_dir: str):
         logger.error(f"job_id: {config['job_id']} user_id: {config['user_id']} Error at run downloader \n {e.__class__.__name__}: {str(e)}")
         return
     
-
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
