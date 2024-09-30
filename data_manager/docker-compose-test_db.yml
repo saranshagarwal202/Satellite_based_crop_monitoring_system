@@ -1,0 +1,48 @@
+version: '3.0'
+
+services:
+  mongo:
+    image: mongo:6-jammy
+    container_name: mongo_db
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongodb:/data/db
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+  
+  sftp:
+    image: atmoz/sftp
+    container_name: sftp
+    volumes:
+      - ./data/sftp:/home/sftp/upload
+    ports:
+      - 22:22
+    networks:
+      - internal
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+    command: sftp:Sftp@12345:1002:12345:./upload
+
+networks:
+  internal:
+    name: cyp_data_manager_network
+
