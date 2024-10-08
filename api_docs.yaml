@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+    title: Micro Service API
+    version: 1.0.0
+servers:
+    - url: data_fetcher:5000
+    - url: data_manager:5001
+    - url: job_runner:5002
+paths:
+    /api/internal/data_fetcher/download:
+        post:
+            summary: called by job runner to strat downloading data from planetAPI
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                user_id:
+                                    type: string
+                                farm_id:
+                                    type: string
+                                start_date:
+                                    type: string
+                                    format: date
+                                end_date:
+                                    type: string
+                                    format: date
+                                aoi_array:
+                                    type: array
+                                    items:
+                                        type: array
+                                        items:
+                                            type: number
+                                cloud_cover:
+                                    type: number
+                                PLANET_API_KEY:
+                                    type: string
+            responses:
+                200:
+                    description: Successful download
+                400:
+                    description: Bad request
+
+    /api/internal/data_manager/add_tif:
+        post:
+            summary: Add files to sftp
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                user_id:
+                                    type: string
+                                farm_id:
+                                    type: string
+                                image_id:
+                                    type: string
+                                image:
+                                    type: string
+                                
+            responses:
+                200:
+                    description: Successful Added
+                400:
+                    description: Bad request
+

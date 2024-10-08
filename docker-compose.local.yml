@@ -1,0 +1,107 @@
+version: '3.9'
+
+services:
+    planet_API:
+        build:
+            context: ./test_PLANET_API/
+            dockerfile: test_PLANET_API/dockerfile
+        container_name: planet_API
+        networks:
+            - job_runner_network
+            - data_manager_network
+        deploy:
+            resources:
+                limits:
+                    cpus: '2'
+                    memory: 8G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
+
+    data_fetcher:
+        build:
+            context: ./data_fetcher/
+            dockerfile: data_fetcher/dockerfile
+        container_name: data_fetcher
+        environment:
+            - DATAMANAGER_URL=http://data_manager:5001
+        networks:
+            - job_runner_network
+        deploy:
+            resources:
+                limits:
+                    cpus: '2'
+                    memory: 8G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
+    data_manager:
+        build:
+            context: ./data_manager/
+            dockerfile: data_manager/dockerfile
+        container_name: data_manager
+        # environment:
+        # - JOBRUNNER_URL=http://job_runner:5001
+        networks:
+            - job_runner_network
+            - data_manager_network
+        deploy:
+            resources:
+                limits:
+                    cpus: '2'
+                    memory: 8G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
+    mongo:
+        image: mongo:6-jammy
+        container_name: mongo_db
+        ports:
+            - 27017:27017
+        volumes:
+            - ./data/mongodb:/data/db
+        networks:
+            - data_manager_network
+        deploy:
+            resources:
+            limits:
+                cpus: '1'
+                memory: 4G
+            restart_policy:
+            condition: on-failure
+            delay: 10s
+            max_attempts: 3
+            window: 120s
+
+    sftp:
+        image: atmoz/sftp
+        container_name: sftp
+        volumes:
+            - ./data/sftp:/home/sftp/upload
+        ports:
+            - 22:22
+        networks:
+            - data_manager_network
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 15s
+                max_attempts: 3
+                window: 120s
+            resources:
+                limits:
+                cpus: '1'
+                memory: 1G
+        command: sftp:Sftp@12345:1002:12345:./upload
+
+networks:
+    data_manager_network:
+        name: data_manager_network
+    job_runner_network:
+        name: job_runner_network
