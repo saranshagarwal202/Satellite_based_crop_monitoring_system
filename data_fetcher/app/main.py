@@ -8,21 +8,18 @@ from api_helper import run_downloader
 
 app = FastAPI(docs_url=None, redoc_url=None)
 
-@app.post(path="/api/internal/download", status_code = 200)
+@app.post(path="/api/internal/data_fetcher/download", status_code = 200)
 async def download_images(request: Request):
     try:
         logger = getLogger()
         config = await request.json()
         check_thread = True # To check if thread is executing properly
         thread = Thread(target=run_downloader, args=(config, check_thread))
+        thread.start()
         st_time = time()
         while check_thread and time()-st_time<=60:
             sleep(1)
-        
 
-
-
-        
         return Response(status_code=200, content="Started Successfully")
     except Exception as e:
         logger.error(

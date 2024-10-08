@@ -45,10 +45,10 @@ def run_downloader(config: dict, output_dir: str):
             
 
             # Add a step for checking for cloud
-            cloud_check = check_for_clouds(cropped_imag)
-            if not cloud_check:
-                logger.info(f"{config['user_id']} Not including cloudy image for image id {image_id}")
-                continue
+            # cloud_check = check_for_clouds(cropped_imag)
+            # if not cloud_check:
+            #     logger.info(f"{config['user_id']} Not including cloudy image for image id {image_id}")
+            #     continue
 
             # dumping cropped image
             profile = scene.profile

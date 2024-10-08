@@ -8,6 +8,7 @@ import os
 from queue import Queue
 
 PLANET_API_KEY = None
+PLANET_API_URL = os.environ.get("PLANET_API_URL")
 
 def __get_auth_headers():
     headers = {'Authorization': f'api-key {PLANET_API_KEY}'}
@@ -53,7 +54,7 @@ def __search_for_scenes(start_date, end_date, aoi_polygon, cloud_cover, item_typ
         search_filter = __generate_search_filter(start_date, end_date, aoi_polygon, cloud_cover, item_types)
         
         # Set the search URL
-        search_url = "https://api.planet.com/data/v1/quick-search"
+        search_url = f"{PLANET_API_URL}/data/v1/quick-search"
         
         # Send the POST request
         response = requests.post(search_url, headers=__get_auth_headers(), json=search_filter)
@@ -86,7 +87,7 @@ def __search_for_scenes(start_date, end_date, aoi_polygon, cloud_cover, item_typ
 def __download_image(image_id, asset_type="ortho_visual"):
     try:
         # Activate asset_type
-        assets_url = f"https://api.planet.com/data/v1/item-types/PSScene/items/{image_id}/assets/"
+        assets_url = f"{PLANET_API_URL}/data/v1/item-types/PSScene/items/{image_id}/assets/"
         
         # Fetch available assets for the image
         response = requests.get(assets_url, headers=__get_auth_headers())
@@ -99,11 +100,14 @@ def __download_image(image_id, asset_type="ortho_visual"):
         
         # Activate the asset
         activate_url = assets[asset_type]['_links']['activate']
+        #'https://api.planet.com/data/v1/assets/{_id}/activate'
         activate_response = requests.get(activate_url, headers=__get_auth_headers())
         activate_response.raise_for_status()
+        # return status 202 with no content
 
         # Poll for asset status
         while True:
+            #'https://api.planet.com/data/v1/item-types/PSScene/items/20230517_161219_25_2430/assets/'
             response = requests.get(assets_url, headers=__get_auth_headers())
             response.raise_for_status() 
             assets = response.json()
@@ -111,6 +115,7 @@ def __download_image(image_id, asset_type="ortho_visual"):
 
             if asset_status == 'active':
                 download_url = assets[asset_type]['location']
+                #'https://api.planet.com/data/v1/download?token=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWN4ekNTUmRSem01UERZMWxvSUZFY010bjR5LXVUdVBCSVd5N2dad2pYT3gtVVR4RHluc2hMVENNVmJHMTdUQ1EwXzA0Mnhjb1RGQmkwU2FfYnJBZz09IiwiZXhwIjoxNzI4MDAxMDMxLCJ0b2tlbl90eXBlIjoidHlwZWQtaXRlbSIsIml0ZW1fdHlwZV9pZCI6IlBTU2NlbmUiLCJpdGVtX2lkIjoiMjAyMzA1MTdfMTYxMjE5XzI1XzI0MzAiLCJhc3NldF90eXBlIjoib3J0aG9fdmlzdWFsIn0.sqe0hcBqTKSdU-9Zna39Wpo4emuu8vnJaWE4gTS0RElDKOR9H73lb0SX5IjGZB1PiIcTFgyqiaTobGUPa14kJQ'
                 download_response = requests.get(download_url, headers=__get_auth_headers())
                 download_response.raise_for_status()
                 return download_response.content
