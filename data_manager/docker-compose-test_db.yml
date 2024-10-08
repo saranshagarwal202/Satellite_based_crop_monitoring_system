@@ -10,6 +10,7 @@ services:
       - ./data/mongodb:/data/db
     networks:
       - internal
+      - test_cyp_network
     deploy:
       resources:
         limits:
@@ -30,6 +31,7 @@ services:
       - 22:22
     networks:
       - internal
+      - test_cyp_network
     deploy:
       restart_policy:
         condition: on-failure
@@ -45,4 +47,6 @@ services:
 networks:
   internal:
     name: cyp_data_manager_network
+  test_cyp_network:
+    name: test_cyp_network
 
