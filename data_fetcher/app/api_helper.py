@@ -25,21 +25,22 @@ def send_to_data_manager(image: bytes, image_id: str, transform: tuple, user_id:
         logger.error(f"User_id: {user_id}. Error: Failed to send tif to data manager.")
     return
 
-def run_downloader(config: dict, check_thread: bool):
+def run_downloader(config: dict, running_processes: dict):
     try:
         st = time()
         eot_received = False # downloader will add 
         queue = Queue()
 
-        thread = Thread(target=download_scenes_to_queue, args=(config["start_date"],
+        thread = Thread(target=download_scenes_to_queue, args=(
+            config["job_id"],
+            config["start_date"],
             config["end_date"],
             config["aoi"],
             config["cloud_cover"],
             queue,
             config["PLANET_API_KEY"]),
-            name=f"Download_scenes_{config["job_id"]}")
+            name=f"Download_scenes_{config['job_id']}")
         thread.start()
-        check_thread=False # set to false to indicate thread started in mian.py
         
         # Processing and sending images to data manager
         
@@ -76,9 +77,12 @@ def run_downloader(config: dict, check_thread: bool):
             send_to_data_manager(f, config["user_id"])
         
         logger.info(f"Finished processing request for user:{config['user_id']}")
+        del running_processes[config['job_id']] # So that app knows that process has ended
         return
     except Exception as e:
         logger.error(f"job_id: {config['job_id']} user_id: {config['user_id']} Error at run downloader \n {e.__class__.__name__}: {str(e)}")
+        del running_processes[config['job_id']] # So that app knows that process has ended
+        # send a signal to job_runner that process ended abruptly
         return
     
 
