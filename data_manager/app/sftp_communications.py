@@ -31,7 +31,7 @@ def _sftp_mkdir_(sftp, remote_directory):
         sftp.chdir(basename)
         return True
 
-def save_tif(image: bytes, imageId: str, userId: str, farmId: str):
+def save_tif(image: bytes, imageId: str, userId: str, projectId: str):
     logger = getLogger()
     try:
         transport = paramiko.Transport(
@@ -39,7 +39,9 @@ def save_tif(image: bytes, imageId: str, userId: str, farmId: str):
         transport.connect(None, environ.get("SFTP_USER"),
                           environ.get("SFTP_PASS"))
         sftp = paramiko.SFTPClient.from_transport(transport)
-        file = sftp.open(f"/upload/crop_yield_prediction/{userId}/{farmId}/{imageId}.tif", "wb")
+        if not _sftp_exists_(sftp, f"/upload/crop_yield_prediction/{userId}/{projectId}/"):
+            _sftp_mkdir_(sftp, f"/upload/crop_yield_prediction/{userId}/{projectId}/")
+        file = sftp.open(f"/upload/crop_yield_prediction/{userId}/{projectId}/{imageId}.tif", "wb")
         file.write(image)
 
         file.close()
@@ -55,7 +57,7 @@ def save_tif(image: bytes, imageId: str, userId: str, farmId: str):
             transport.close()
         except BaseException:
             pass
-        logger.error(f"userId: {userId} farmId: {farmId} imageId: {imageId} failed to save tif in sftp.")
+        logger.error(f"userId: {userId} projectId: {projectId} imageId: {imageId} failed to save tif in sftp.")
         raise e
 
 def _sftp_exists_(sftp, path):

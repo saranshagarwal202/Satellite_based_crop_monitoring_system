@@ -2,8 +2,11 @@ version: '3.0'
 
 services:
   mongo:
-    image: mongo:6-jammy
+    image: mongo:8
     container_name: mongo_db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
     ports:
       - 27017:27017
     volumes:
@@ -21,6 +24,22 @@ services:
         delay: 10s
         max_attempts: 3
         window: 120s
+
+  mongo_express:
+    image: mongo-express:latest
+    container_name: mongo_express
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mongo
+    ports:
+      - "8081:8081"
+    networks:
+      - internal
+      - test_cyp_network
+    depends_on:
+      - mongo
+
   
   sftp:
     image: atmoz/sftp
@@ -47,6 +66,8 @@ services:
 networks:
   internal:
     name: cyp_data_manager_network
+    external: true
   test_cyp_network:
     name: test_cyp_network
+    external: true
 

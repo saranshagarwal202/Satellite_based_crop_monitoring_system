@@ -18,8 +18,11 @@ paths:
                             properties:
                                 user_id:
                                     type: string
-                                farm_id:
+                                project_id:
                                     type: string
+                                job_id:
+                                    type: string
+                                    description: The job id is created everytime a user presses start
                                 start_date:
                                     type: string
                                     format: date
@@ -31,7 +34,12 @@ paths:
                                     items:
                                         type: array
                                         items:
-                                            type: number
+                                            type: object
+                                            properties:
+                                                x:
+                                                    type: number
+                                                y:
+                                                    type: number
                                 cloud_cover:
                                     type: number
                                 PLANET_API_KEY:
@@ -41,6 +49,15 @@ paths:
                     description: Successful download
                 400:
                     description: Bad request
+
+    /api/internal/data_fetcher/stop:
+        get:
+            summary: To stop the running download job
+            responses:
+                200:
+                    description: Successful stop
+                400:
+                    description: job does not exist
 
     /api/internal/data_manager/add_tif:
         post:
@@ -53,12 +70,28 @@ paths:
                             properties:
                                 user_id:
                                     type: string
-                                farm_id:
+                                project_id:
                                     type: string
                                 image_id:
                                     type: string
                                 image:
                                     type: string
+                                transform:
+                                    type: object
+                                    properties:
+                                        x_coord:
+                                            type: number
+                                        y_coord:
+                                            type: number
+                                        x_meter:
+                                            type: number
+                                        y_meter:
+                                            type: number
+                                        x_rotation:
+                                            type: number
+                                        y_rotation:
+                                            type: number
+
                                 
             responses:
                 200:

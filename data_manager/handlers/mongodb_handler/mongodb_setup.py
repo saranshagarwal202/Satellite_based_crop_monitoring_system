@@ -1,9 +1,12 @@
 from pymongo import MongoClient
 from datetime import datetime
+from os import environ
 
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient(f"mongodb://{environ['MONGO_DB_USERNAME']}:{environ['MONGO_DB_PASSWORD']}@{environ['MONGO_DB_URL']}:{environ['MONGO_DB_PORT']}/")
 
 db = client['metadata_store']
+
+user_db = db['user']
 
 crop_field_metadata = db['crop_field_metadata']
 vegetation_indices = db['vegetation_indices']

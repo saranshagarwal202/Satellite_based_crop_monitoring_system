@@ -8,8 +8,8 @@
 	"containerEnv": {
 		"SFTP_HOST": "sftp",
 		"SFTP_PORT": "22",
-		"SFTP_USER": "Sftp",
-		"SFTP_PASS": "1235"
+		"SFTP_USER": "sftp",
+		"SFTP_PASS": "Sftp@12345"
 	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
