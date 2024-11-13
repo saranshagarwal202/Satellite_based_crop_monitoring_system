@@ -37,7 +37,7 @@ class ImageRequest(BaseModel):
 async def signup(request: Request, signup_data: SignupRequest):
     try:
         logger = getLogger()
-        data_manager_url = f"{environ['data_manager']}/api/internal/user/add"
+        data_manager_url = f"{environ['data_manager']}/api/internal/data_manager//user/add"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(data_manager_url, json=signup_data.dict())
@@ -56,7 +56,7 @@ async def signup(request: Request, signup_data: SignupRequest):
 async def login(request: Request, login_data: LoginRequest):
     try:
         logger = getLogger()
-        data_manager_url = f"{environ['data_manager']}/api/internal/user/verify"
+        data_manager_url = f"{environ['data_manager']}/api/internal/data_manager//user/verify"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(data_manager_url, json=login_data.dict())
@@ -85,7 +85,7 @@ async def get_projects(request: Request, authorization: str = Header(None), user
         logger = getLogger()
         verify_token(authorization, user_id)
         
-        data_manager_url = f"{environ['data_manager']}/api/internal/project/get"
+        data_manager_url = f"{environ['data_manager']}/api/internal/data_manager//project/get"
         
         async with httpx.AsyncClient() as client:
             response = await client.get(data_manager_url, headers={"user_id": user_id})
@@ -106,7 +106,7 @@ async def add_project(request: Request, project_data: ProjectRequest, authorizat
         logger = getLogger()
         verify_token(authorization, user_id)
         
-        data_manager_url = f"{environ['data_manager']}/api/internal/project/add"
+        data_manager_url = f"{environ['data_manager']}/api/internal/data_manager//project/add"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(data_manager_url, json=project_data.dict(), headers={"user_id": user_id})
@@ -127,7 +127,7 @@ async def get_image(request: Request, project_id: str, image_data: ImageRequest,
         logger = getLogger()
         verify_token(authorization, user_id)
         
-        data_manager_url = f"{environ['data_manager']}/api/internal/image/get"
+        data_manager_url = f"{environ['data_manager']}/api/internal/data_manager//image/get"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(data_manager_url, json={**image_data.dict(), "project_id": project_id}, headers={"user_id": user_id})
