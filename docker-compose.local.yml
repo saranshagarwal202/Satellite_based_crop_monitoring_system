@@ -100,6 +100,28 @@ services:
           memory: 1G
     command: sftp:Sftp@12345:1002:12345:./upload
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - job_runner_network
+    environment:
+      - REACT_APP_API_URL=http://job_runner:5000
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+
 networks:
   data_manager_network:
     name: data_manager_network
