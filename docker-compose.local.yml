@@ -1,129 +1,154 @@
 version: "3.9"
 
 services:
-  planet_API:
-    build:
-      context: ./test_PLANET_API/
-      dockerfile: test_PLANET_API/dockerfile
-    container_name: planet_API
-    networks:
-      - job_runner_network
-      - data_manager_network
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 8G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 3
-        window: 120s
+    planet_API:
+        build:
+            context: ./test_PLANET_API/
+            dockerfile: test_PLANET_API/dockerfile
+        container_name: planet_API
+        networks:
+            - job_runner_network
+            - data_manager_network
+        deploy:
+            resources:
+                limits:
+                    cpus: "2"
+                    memory: 8G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
 
-  data_fetcher:
-    build:
-      context: ./data_fetcher/
-      dockerfile: data_fetcher/dockerfile
-    container_name: data_fetcher
-    environment:
-      - DATAMANAGER_URL=http://data_manager:5001
-    networks:
-      - job_runner_network
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 8G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 3
-        window: 120s
-  data_manager:
-    build:
-      context: ./data_manager/
-      dockerfile: data_manager/dockerfile
-    container_name: data_manager
-    # environment:
-    # - JOBRUNNER_URL=http://job_runner:5001
-    networks:
-      - job_runner_network
-      - data_manager_network
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 8G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 3
-        window: 120s
-  mongo:
-    image: mongo:6-jammy
-    container_name: mongo_db
-    ports:
-      - 27017:27017
-    volumes:
-      - ./data/mongodb:/data/db
-    networks:
-      - data_manager_network
-    deploy:
-        resources:
-            limits:
-                cpus: "1"
-                memory: 4G
-        restart_policy:
-            condition: on-failure
-            delay: 10s
-            max_attempts: 3
-            window: 120s
+    data_fetcher:
+        build:
+            context: ./data_fetcher/
+            dockerfile: data_fetcher/dockerfile
+        container_name: data_fetcher
+        environment:
+            - DATAMANAGER_URL=http://data_manager:5001
+            - PLANET_API_URL=http://test_planet_api:4999
+        networks:
+            - job_runner_network
+        deploy:
+            resources:
+                limits:
+                    cpus: "2"
+                    memory: 8G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
+    data_manager:
+        build:
+            context: ./data_manager/
+            dockerfile: data_manager/dockerfile
+        container_name: data_manager
+        environment:
+            - MONGO_DB_URL=mongo
+            - MONGO_DB_PORT=27017,
+            - MONGO_DB_USERNAME=admin
+            - MONGO_DB_PASSWORD=password
+            - SFTP_HOST=sftp
+            - SFTP_PORT=22
+            - SFTP_USER=sftp
+            - SFTP_PASS=Sftp@12345
+        networks:
+            - job_runner_network
+            - data_manager_network
+        deploy:
+            resources:
+                limits:
+                    cpus: "2"
+                    memory: 8G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
+    mongo:
+        image: mongo:8
+        container_name: mongo_db
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=admin
+            - MONGO_INITDB_ROOT_PASSWORD=password
+        ports:
+            - 27017:27017
+        volumes:
+            - ./data/mongodb:/data/db
+        networks:
+            - data_manager_network
+        deploy:
+            resources:
+                limits:
+                    cpus: "1"
+                    memory: 4G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
 
-  sftp:
-    image: atmoz/sftp
-    container_name: sftp
-    volumes:
-      - ./data/sftp:/home/sftp/upload
-    ports:
-      - 22:22
-    networks:
-      - data_manager_network
-    deploy:
-      restart_policy:
-        condition: on-failure
-        delay: 15s
-        max_attempts: 3
-        window: 120s
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1G
-    command: sftp:Sftp@12345:1002:12345:./upload
+    mongo_express:
+        image: mongo-express:latest
+        container_name: mongo_express
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo
+        ports:
+            - "8081:8081"
+        networks:
+            - data_manager_network
+        depends_on:
+            - mongo
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: frontend
-    ports:
-      - "3000:3000"
-    networks:
-      - job_runner_network
-    environment:
-      - REACT_APP_API_URL=http://job_runner:5000
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 1G
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 3
-        window: 120s
+    sftp:
+        image: atmoz/sftp
+        container_name: sftp
+        volumes:
+            - ./data/sftp:/home/sftp/upload
+        ports:
+            - 22:22
+        networks:
+            - data_manager_network
+        deploy:
+            restart_policy:
+                condition: on-failure
+                delay: 15s
+                max_attempts: 3
+                window: 120s
+            resources:
+                limits:
+                    cpus: "1"
+                    memory: 1G
+        command: sftp:Sftp@12345:1002:12345:./upload
+
+    frontend:
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+        container_name: frontend
+        ports:
+            - "3000:3000"
+        networks:
+            - job_runner_network
+        environment:
+            - REACT_APP_API_URL=http://job_runner:5000
+        deploy:
+            resources:
+                limits:
+                    cpus: "1"
+                    memory: 1G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
 
 networks:
-  data_manager_network:
-    name: data_manager_network
-  job_runner_network:
-    name: job_runner_network
+    data_manager_network:
+        name: data_manager_network
+    job_runner_network:
+        name: job_runner_network
