@@ -1,10 +1,19 @@
 FROM python:3.10-slim
 
-COPY ./app /app
-COPY ./requirements.txt /requirements.txt
-WORKDIR /
+RUN apt-get update && apt-get install -y \
+    gdal-bin \
+    libgdal-dev \
+    build-essential
 
-RUN apt-get update
+ENV GDAL_VERSION=3.6.0
+ENV GDAL_INCLUDE_DIR=/usr/include/gdal
+ENV GDAL_LIB_DIR=/usr/lib/x86_64-linux-gnu
+
+COPY ./requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
 
-CMD ["python3", "app/main.py"]
+COPY ./app /app
+
+WORKDIR /app
+
+CMD ["python3", "main.py"]

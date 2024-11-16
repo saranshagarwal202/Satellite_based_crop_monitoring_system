@@ -1,11 +1,11 @@
-version: "3.9"
+# version: "3.9"
 
 services:
-    planet_API:
+    planet_api:
         build:
             context: ./test_PLANET_API/
-            dockerfile: test_PLANET_API/dockerfile
-        container_name: planet_API
+            dockerfile: dockerfile
+        container_name: planet_api
         networks:
             - job_runner_network
             - data_manager_network
@@ -23,7 +23,7 @@ services:
     data_fetcher:
         build:
             context: ./data_fetcher/
-            dockerfile: data_fetcher/dockerfile
+            dockerfile: dockerfile
         container_name: data_fetcher
         environment:
             - DATAMANAGER_URL=http://data_manager:5001
@@ -43,7 +43,7 @@ services:
     data_manager:
         build:
             context: ./data_manager/
-            dockerfile: data_manager/dockerfile
+            dockerfile: dockerfile
         container_name: data_manager
         environment:
             - MONGO_DB_URL=mongo
@@ -128,14 +128,14 @@ services:
     frontend:
         build:
             context: ./frontend
-            dockerfile: Dockerfile
+            dockerfile: dockerfile
         container_name: frontend
         ports:
             - "3000:3000"
         networks:
             - job_runner_network
         environment:
-            - REACT_APP_API_URL=http://job_runner:5000
+            - PLANET_API_URL=http://test_planet_api:4999
         deploy:
             resources:
                 limits:
