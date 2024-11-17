@@ -4,7 +4,8 @@
 	"name": "Job Runner",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/python:1-3.10-bookworm",
-	"runArgs": ["--platform=linux/amd64", "--network=test_cyp_network", "--name=devcontainer_job_runner"]
+	"runArgs": ["--platform=linux/amd64", "--network=test_cyp_network", "--name=job_runner"],
+	"containerEnv": {"DATAMANAGER_URL": "http://data_manager:5001"}
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 
