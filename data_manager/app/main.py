@@ -37,6 +37,10 @@ async def download_images(request: Request):
 async def add_user(request: Request):
     try:
         user_data = await request.json()
+        already_exist = db.users.find_one({"email": user_data["email"]})
+        if bool(already_exist):
+            logger.info(f"201 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - User already exist: {user_data['email']}")
+            return Response(status_code=201, content="User already exist")
         result = db.users.insert_one({
             "email": user_data["email"],
             "password": user_data["password"],
@@ -89,9 +93,14 @@ async def add_project(request: Request):
             "farm_name": project_data["farm_name"],
             "aoi": project_data["aoi"],
             "crop": project_data["crop"],
-            "created_at": project_data["created_at"]
+            "created_at": project_data["created_at"],
+            "user_id": user_id
         }
         
+        already_exist = db.projects.find_one({"user_id": user_id, "farm_name": project_data["farm_name"]})
+        if bool(already_exist):
+            logger.info(f"201 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Project already exist: {project_data['farm_name']}")
+            return Response(status_code=201, content="Project already exist")
         result = db.projects.insert_one(project)
         project_id = result.inserted_id
         

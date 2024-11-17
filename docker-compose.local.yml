@@ -23,7 +23,7 @@ services:
     data_fetcher:
         build:
             context: ./data_fetcher/
-            dockerfile: dockerfile
+            dockerfile: Dockerfile
         container_name: data_fetcher
         environment:
             - DATAMANAGER_URL=http://data_manager:5001
@@ -48,7 +48,7 @@ services:
         container_name: data_manager
         environment:
             - MONGO_DB_URL=mongo
-            - MONGO_DB_PORT=27017,
+            - MONGO_DB_PORT=27017
             - MONGO_DB_USERNAME=admin
             - MONGO_DB_PASSWORD=password
             - SFTP_HOST=sftp
@@ -68,6 +68,8 @@ services:
                 delay: 10s
                 max_attempts: 3
                 window: 120s
+        depends_on:
+            - mongo
 
     mongo:
         image: mongo:8
@@ -78,7 +80,7 @@ services:
         ports:
             - 27017:27017
         volumes:
-            - ./data/mongodb:/data/db
+            - ./data_manager/data/mongodb:/data/db
         networks:
             - data_manager_network
         deploy:
@@ -110,7 +112,7 @@ services:
         image: atmoz/sftp
         container_name: sftp
         volumes:
-            - ./data/sftp:/home/sftp/upload
+            - ./data_manager/data/sftp:/home/sftp/upload
         ports:
             - 22:22
         networks:
@@ -153,9 +155,7 @@ services:
     frontend:
         build:
             context: ./frontend
-            dockerfile: dockerfile
-            args:
-                - REACT_APP_JOBRUNNER_API_URL=http://localhost:5002
+            dockerfile: Dockerfile
         container_name: frontend
         depends_on:
             - job_runner
