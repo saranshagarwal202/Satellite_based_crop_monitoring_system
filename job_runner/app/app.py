@@ -11,7 +11,21 @@ from sys import stdout
 import jwt
 from datetime import datetime, timedelta
 
+# Just for demo
+from fastapi.middleware.cors import CORSMiddleware
+# Just for demo end
+
 app = FastAPI(docs_url=None, redoc_url=None)
+
+# Just for demo
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# Just for demo end
 
 class SignupRequest(BaseModel):
     email: str
@@ -37,7 +51,7 @@ class ImageRequest(BaseModel):
 async def signup(request: Request, signup_data: SignupRequest):
     try:
         logger = getLogger()
-        data_manager_url = f"{environ['data_manager']}/api/internal/data_manager//user/add"
+        data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager//user/add"
         
         async with httpx.AsyncClient() as client:
             response = await client.post(data_manager_url, json=signup_data.dict())

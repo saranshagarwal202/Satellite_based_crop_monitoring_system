@@ -4,17 +4,26 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import * as constants from '../config/constants';
 import { PRIMARY_COLOR, TEXT_COLOR } from '../config/colors';  
 import { LoginPageImage1 } from '../config/images';  
+import { signUp } from '../services/authservice'; // Adjust the path as necessary
+
 
 function SignUp() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [planetApiKey, setPlanetApiKey] = useState('');
   const [email, setEmail] = useState('');
 
   const handleSignUp = async () => {
     try {
-      alert('Sign-up successful!');
+      const response = await signUp(username, password, email, planetApiKey);
+      
+      if (response.status === 'success') {
+        alert('Sign-up successful!');
+      } else {
+        alert(response.message);
+      }
     } catch (error) {
-      alert(error.message);
+      alert('Error during sign-up: ' + error.message);
     }
   };
 
@@ -56,6 +65,16 @@ function SignUp() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Planet API Key" // Add this to constants file
+              type="text"
+              value={planetApiKey}
+              onChange={(e) => setPlanetApiKey(e.target.value)}
+              autoComplete="off"
             />
             <Button
               fullWidth

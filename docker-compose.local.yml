@@ -40,6 +40,7 @@ services:
                 delay: 10s
                 max_attempts: 3
                 window: 120s
+
     data_manager:
         build:
             context: ./data_manager/
@@ -67,6 +68,7 @@ services:
                 delay: 10s
                 max_attempts: 3
                 window: 120s
+
     mongo:
         image: mongo:8
         container_name: mongo_db
@@ -125,22 +127,49 @@ services:
                     memory: 1G
         command: sftp:Sftp@12345:1002:12345:./upload
 
+    job_runner:
+        build:
+            context: ./job_runner  
+            dockerfile: dockerfile  
+        container_name: job_runner
+        ports:
+            - "5002:5002"  
+        networks:
+            - job_runner_network
+        environment:
+            - DATAMANAGER_URL=http://data_manager:5001
+            - PLANET_API_URL=http://test_planet_api:4999
+        deploy:
+            resources:
+                limits:
+                    cpus: "2"
+                    memory: 4G
+            restart_policy:
+                condition: on-failure
+                delay: 10s
+                max_attempts: 3
+                window: 120s
+
     frontend:
         build:
             context: ./frontend
             dockerfile: dockerfile
+            args:
+                - REACT_APP_JOBRUNNER_API_URL=http://localhost:5002
         container_name: frontend
+        depends_on:
+            - job_runner
         ports:
             - "3000:3000"
         networks:
             - job_runner_network
         environment:
-            - PLANET_API_URL=http://test_planet_api:4999
+            - REACT_APP_JOBRUNNER_API_URL=http://localhost:5002
         deploy:
             resources:
                 limits:
-                    cpus: "1"
-                    memory: 1G
+                    cpus: "2"
+                    memory: 4G
             restart_policy:
                 condition: on-failure
                 delay: 10s

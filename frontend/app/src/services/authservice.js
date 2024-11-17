@@ -1,26 +1,39 @@
+import axios from 'axios';
+
+const jobRunnerInstance = axios.create({
+  baseURL: process.env.REACT_APP_JOBRUNNER_API_URL,
+});
+
+console.log("REACT_APP_JOBRUNNER_API_URL:", jobRunnerInstance.defaults.baseURL);
+
+export const signUp = async (username, password, email, planetApiKey) => {
+  try {
+    const response = await jobRunnerInstance.post('/api/external/auth/signup', {
+      email,
+      password,
+      name: username,
+      PLANET_API_KEY: planetApiKey,
+    });
+    return { status: 'success', data: response.data };
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
+
 export const login = async (username, password) => {
-    // Mocking an API call, replace with actual API logic
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (username === 'admin' && password === 'password') {
-          resolve({ status: 'success' });
-        } else {
-          reject({ status: 'error', message: 'Invalid credentials' });
-        }
-      }, 1000);
+  try {
+    const response = await jobRunnerInstance.post('/api/external/auth/login', {
+      username,
+      password,
     });
-  };
-  
-  export const signUp = async (username, password, email) => {
-    // Mocking an API call, replace with actual API logic
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (username && password && email) {
-          resolve({ status: 'success' });
-        } else {
-          reject({ status: 'error', message: 'All fields are required' });
-        }
-      }, 1000);
-    });
-  };
-  
+    return { status: 'success', data: response.data };
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
