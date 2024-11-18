@@ -28,11 +28,10 @@ export const addUserProject = async (authorization, userId, projectData) => {
     const response = await jobRunnerInstance.post(
       '/api/external/projects',
       {
-        // Full request body structure as specified in the OpenAPI schema
         farm_name: projectData.farm_name,
-        aoi: projectData.aoi, // Array of arrays
+        aoi: projectData.aoi,
         crop: projectData.crop,
-        created_at: projectData.created_at, // ISO date string
+        created_at: projectData.created_at,
       },
       {
         headers: {
