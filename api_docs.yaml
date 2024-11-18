@@ -395,10 +395,41 @@ paths:
                                 end_date:
                                     type: string
             responses:
-                '200':
-                    description: Images retrieved successfully
+                '202':
+                    description: Request accepted. Images are being downloaded in the background.
                 '400':
                     description: Failed to retrieve images
+                '500':
+                    description: Internal server error
+
+    /api/external/projects/{project_id}/images/status:
+        get:
+            summary: Check image download status
+            parameters:
+                - in: path
+                  name: project_id
+                  required: true
+                  schema:
+                      type: string
+                - in: header
+                  name: authorization
+                  required: true
+                  schema:
+                      type: string
+                - in: header
+                  name: user_id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Image download completed successfully.
+                '202':
+                    description: Image download is still in progress.
+                '400':
+                    description: Invalid project ID or request.
+                '500':
+                    description: Internal server error.
     
     /api/external/projects/{project_id}/image:
         post:
