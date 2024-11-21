@@ -8,16 +8,33 @@ import { login } from '../services/authservice';
 import { LoginPageImage1, LoginPageImage2 } from '../config/images'; 
 
 function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState(''); // Updated to `email` for API compliance
   const [password, setPassword] = useState('');
   const navigate = useNavigate();  
 
   const handleLogin = async () => {
     try {
-      const response = await login(username, password);
-      alert('Login successful!');
+      const response = await login(email, password);
+
+      if (response.status === 'success') {
+        const { user, token, expires_in } = response.data;
+        console.log('User:', user);
+        console.log('Token:', token);
+        console.log('Expires in:', expires_in);
+
+        // Store the token for session management
+        localStorage.setItem('authToken', token);
+        alert('Login successful!');
+
+        // Redirect to dashboard or a protected route
+        navigate('/dashboard');
+      } else {
+        // Show error message from API response
+        alert(`Error: ${response.message}`);
+      }
     } catch (error) {
-      alert(error.message);
+      // General error handling for unexpected issues
+      alert('An unexpected error occurred. Please try again later.');
     }
   };
 
@@ -36,10 +53,10 @@ function Login() {
               margin="normal"
               required
               fullWidth
-              label={constants.USERNAME_LABEL}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
+              label={constants.EMAIL_LABEL}
+              value={email} // Updated to `email`
+              onChange={(e) => setEmail(e.target.value)} // Updated handler
+              autoComplete="email" // Updated to `email`
             />
             <TextField
               margin="normal"
@@ -61,7 +78,7 @@ function Login() {
               {constants.LOGIN_BUTTON_TEXT}
             </Button>
             <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-                 Don't have an account?{' '}<a href="/signup" style={{ color: PRIMARY_COLOR }}>Sign up here</a>  
+              Don't have an account?{' '}<a href="/signup" style={{ color: PRIMARY_COLOR }}>Sign up here</a>  
             </Typography>
 
             <Grid container justifyContent="center" sx={{ mt: 2 }}>
@@ -73,7 +90,6 @@ function Login() {
                 Skip to root
               </Button>
             </Grid>
-
           </Box>
         </Box>
       </Grid>

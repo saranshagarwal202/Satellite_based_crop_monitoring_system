@@ -23,17 +23,32 @@ export const signUp = async (username, password, email, planetApiKey) => {
   }
 };
 
-export const login = async (username, password) => {
+export const login = async (email, password) => {
   try {
     const response = await jobRunnerInstance.post('/api/external/auth/login', {
-      username,
+      email, 
       password,
     });
-    return { status: 'success', data: response.data };
+
+    if (response.status === 200) {
+      return {
+        status: 'success',
+        data: {
+          user: response.data.user,       
+          token: response.data.token,     
+          expires_in: response.data.expires_in, 
+        },
+      };
+    } else {
+      return {
+        status: 'error',
+        message: 'Unexpected response from server.',
+      };
+    }
   } catch (error) {
     return {
       status: 'error',
-      message: error.response?.data?.message || error.message,
+      message: error.response?.data?.message || 'An unexpected error occurred.',
     };
   }
 };

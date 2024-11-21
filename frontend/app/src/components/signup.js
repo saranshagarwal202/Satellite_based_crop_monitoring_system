@@ -5,6 +5,7 @@ import * as constants from '../config/constants';
 import { PRIMARY_COLOR, TEXT_COLOR } from '../config/colors';  
 import { LoginPageImage1 } from '../config/images';  
 import { signUp } from '../services/authservice'; // Adjust the path as necessary
+import { useNavigate } from 'react-router-dom';
 
 
 function SignUp() {
@@ -12,6 +13,7 @@ function SignUp() {
   const [password, setPassword] = useState('');
   const [planetApiKey, setPlanetApiKey] = useState('');
   const [email, setEmail] = useState('');
+  const navigate = useNavigate();
 
   const handleSignUp = async () => {
     try {
@@ -19,6 +21,7 @@ function SignUp() {
       
       if (response.status === 'success') {
         alert('Sign-up successful!');
+        navigate('/login');
       } else {
         alert(response.message);
       }
