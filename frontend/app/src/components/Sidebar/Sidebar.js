@@ -70,7 +70,7 @@ function Sidebar({ onProjectSelect, user, projects }) {
             }
           }}
           fullWidth
-          onClick={() => navigate('/polygon-marker')}
+          onClick={() => navigate('/create-project-pane')}
         >
           + New Project
         </Button>

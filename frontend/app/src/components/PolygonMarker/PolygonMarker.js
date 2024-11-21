@@ -3,11 +3,11 @@ import { MapContainer, TileLayer, FeatureGroup } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import DownloadIcon from '@mui/icons-material/Download';
-import { Fab, Tooltip } from '@mui/material';
+import { Button } from '@mui/material';
 
-function PolygonMarker() {
+function PolygonMarker({ onAoiSubmit }) {
   const [geoJsonData, setGeoJsonData] = useState(null);
+  const [isEditable, setIsEditable] = useState(true); // Track edit state
   const mapRef = useRef();
 
   const onCreated = (e) => {
@@ -17,81 +17,59 @@ function PolygonMarker() {
     console.log('GeoJSON:', geoJson);
   };
 
-  const downloadGeoJSON = () => {
-    if (!geoJsonData) {
-      alert("No GeoJSON data available!");
-      return;
+  const freezePolygon = () => {
+    if (geoJsonData) {
+      setIsEditable(false); // Disable editing
+      if (onAoiSubmit) {
+        onAoiSubmit(geoJsonData); // Send finalized GeoJSON to parent
+      }
+    } else {
+      alert('Please draw a polygon before freezing.');
     }
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geoJsonData));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', 'polygon.geojson');
-    downloadAnchor.click();
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>  
-      <div style={{
-        backgroundColor: 'black', 
-        color: 'white', 
-        fontSize: '20px',
-        fontWeight: 'bold', 
-        padding: '10px 20px',
-        display: 'flex', 
-        alignItems: 'center',
-        flexShrink: 0,  
-        height: '50px',  
-        boxSizing: 'border-box'  
-      }}>
-        Cotton Yield Prediction - AOI Marker
-      </div>
-      
-      {/* Map Container */}
-      <div style={{ flexGrow: 1 }}>  
-        <MapContainer
-          center={[30.62798, -96.33441]}  
-          zoom={13}
-          scrollWheelZoom={false}
-          style={{ height: "100%", width: "100%" }}  
-          ref={mapRef}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    <div style={{ height: '100%', width: '100%', position: 'relative' }}>
+      <MapContainer
+        center={[30.62798, -96.33441]}
+        zoom={13}
+        style={{ height: '100%', width: '100%' }}
+        ref={mapRef}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap contributors'
+        />
+        <FeatureGroup>
+          <EditControl
+            position="topright"
+            onCreated={onCreated}
+            edit={{ edit: isEditable, remove: isEditable }}
+            draw={{
+              rectangle: false,
+              circle: false,
+              circlemarker: false,
+              polyline: false,
+              marker: false,
+            }}
           />
-          
-          <FeatureGroup>
-            <EditControl
-              position="topright"
-              onCreated={onCreated}
-              draw={{
-                rectangle: false,
-                circle: true,
-                circlemarker: false,
-                polyline: false,
-                marker: false
-              }}
-            />
-          </FeatureGroup>
-        </MapContainer>
-      </div>
+        </FeatureGroup>
+      </MapContainer>
 
-      <Tooltip title="Download GeoJSON" arrow>
-        <Fab
-          color="primary"
-          aria-label="download"
-          onClick={downloadGeoJSON}
-          style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: '20px',
-            width: '80px',
-            height: '80px',
-          }}
-        >
-          <DownloadIcon style={{ fontSize: 40 }} />
-        </Fab>
-      </Tooltip>
+      {/* Freeze Polygon Button */}
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={freezePolygon}
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '20px',
+          zIndex: 1000,
+        }}
+      >
+        Freeze Polygon
+      </Button>
     </div>
   );
 }
