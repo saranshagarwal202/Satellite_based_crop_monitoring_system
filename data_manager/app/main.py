@@ -91,9 +91,9 @@ async def verify_user(request: Request):
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
 @app.get("/api/internal/data_manager/project/get", status_code=200)
-async def get_projects(user_id: str = Header(None)):
+async def get_projects(request: Request):
     try:
-        user = db.users.find_one({"_id": ObjectId(user_id)})
+        user = db.users.find_one({"_id": ObjectId(request.headers['user_id'])})
         if user:
             project_ids = user.get("projects_id", [])
             projects = list(db.projects.find({"_id": {"$in": project_ids}}))
