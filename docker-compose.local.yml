@@ -30,6 +30,8 @@ services:
             - PLANET_API_URL=http://test_planet_api:4999
         networks:
             - job_runner_network
+        volumes:
+          - ./data_fetcher/app:/app
         deploy:
             resources:
                 limits:
@@ -58,6 +60,8 @@ services:
         networks:
             - job_runner_network
             - data_manager_network
+        volumes:
+          - ./data_manager/app:/app
         deploy:
             resources:
                 limits:
@@ -131,13 +135,15 @@ services:
 
     job_runner:
         build:
-            context: ./job_runner  
+            context: ./job_runner/
             dockerfile: dockerfile  
         container_name: job_runner
         ports:
             - "5002:5002"  
         networks:
             - job_runner_network
+        volumes:
+          - ./job_runner/app:/app
         environment:
             - DATAMANAGER_URL=http://data_manager:5001
             - PLANET_API_URL=http://test_planet_api:4999
@@ -163,6 +169,8 @@ services:
             - "3000:3000"
         networks:
             - job_runner_network
+        volumes:
+          - ./frontend/app:/app
         environment:
             - REACT_APP_JOBRUNNER_API_URL=http://localhost:5002
         deploy:
