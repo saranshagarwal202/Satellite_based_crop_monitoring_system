@@ -141,3 +141,41 @@ export const getImageByTypeAndDate = async (authorization, userId, projectId, im
     };
   }
 };
+
+export const downloadImagesForProject = async (authorization, userId, projectId, dateRange, aoi) => {
+  try {
+    const response = await jobRunnerInstance.post(
+      `/api/external/projects/${projectId}/download_images`,
+      {
+        start_date: dateRange.start_date,
+        end_date: dateRange.end_date,
+        aoi: aoi, 
+      },
+      {
+        headers: {
+          authorization,
+          user_id: userId,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.status === 202) {
+      return {
+        status: 'success',
+        message: 'Images are being downloaded in the background.',
+      };
+    } else {
+      return {
+        status: 'error',
+        message: 'Failed to initiate image download.',
+      };
+    }
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
+

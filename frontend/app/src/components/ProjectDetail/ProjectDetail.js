@@ -217,6 +217,32 @@ const ProjectDetail = () => {
   const [anchorEl, setAnchorEl] = useState(null); // Anchor element for dropdown
   const availableDates = ['2024-11-20', '2024-11-15', '2024-11-10']; // Dropdown values
 
+  const initiateImageDownload = async () => {
+    const authorization = 'Bearer your-token';
+    const userId = 'user-id';
+    const projectId = 'project-id';
+    const dateRange = {
+      start_date: '2024-11-01',
+      end_date: '2024-11-15',
+    };
+    const aoi = [
+      [-96.376705, 30.630891],
+      [-96.332932, 30.641232],
+      [-96.341171, 30.609763],
+      [-96.376705, 30.630891],
+    ]; 
+  
+    const result = await downloadImagesForProject(authorization, userId, projectId, dateRange, aoi);
+  
+    if (result.status === 'success') {
+      console.log(result.message);
+      alert(result.message);
+    } else {
+      console.error(result.message);
+      alert(result.message);
+    }
+  };
+
   const fetchImage = async () => {
     const authorization = 'Bearer your-token';
     const userId = 'user-id';
