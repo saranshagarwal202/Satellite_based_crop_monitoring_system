@@ -4,6 +4,8 @@ import PolygonMarker from '../PolygonMarker/PolygonMarker.js';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './CreateProject.css'; // Import CSS for transitions and additional styling
 import { addUserProject } from '../../services/projectservice';
+import { useNavigate } from 'react-router-dom';
+
 
 const CreateProject = () => {
   const [step, setStep] = useState(1); // Track current step
@@ -11,6 +13,8 @@ const CreateProject = () => {
   const [crop, setCrop] = useState('');
   const [seedingDate, setSeedingDate] = useState('');
   const [aoi, setAoi] = useState(null); // AOI GeoJSON
+  const navigate = useNavigate();
+
 
   const handleAoiSubmit = (geoJson) => {
     setAoi(geoJson);
@@ -116,6 +120,7 @@ const handleSubmit = async () => {
     if (response.status === 'success') {
       alert('Project Created Successfully!');
       console.log('API Response:', response.data);
+      navigate('/dashboard');
     } else {
       alert(`Error: ${response.message}`);
     }
