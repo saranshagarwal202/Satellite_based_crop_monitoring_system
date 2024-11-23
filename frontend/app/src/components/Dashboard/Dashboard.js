@@ -109,6 +109,7 @@ const Dashboard = () => {
         setProjects(response.data);
       } else {
         console.error(`Error fetching projects: ${response.message}`);
+        alert('Error fetching projects: ${response.message}')
       }
 
       setLoading(false);
