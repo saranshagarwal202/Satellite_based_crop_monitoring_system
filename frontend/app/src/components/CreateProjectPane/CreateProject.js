@@ -14,22 +14,43 @@ const CreateProject = () => {
   const handleAoiSubmit = (geoJson) => {
     setAoi(geoJson);
     setStep(step + 1); // Go to the next step
+    alert('got aoi')
   };
 
+  // const handleSubmit = () => {
+  //   if (!farmName || !crop || !seedingDate || !aoi) {
+  //     alert('Please fill out all fields and select an AOI.');
+  //     return;
+  //   }
+
+  //   const projectData = {
+  //     farm_name: farmName,
+  //     crop,
+  //     seeding_date: seedingDate,
+  //     aoi: aoi.features[0].geometry.coordinates, // Extract AOI coordinates
+  //     created_at: new Date().toISOString(),
+  //   };
+
+  //   console.log('Submitting Project Data:', projectData);
+  //   alert('Project Created Successfully!');
+  // };
+
   const handleSubmit = () => {
-    if (!farmName || !crop || !seedingDate || !aoi) {
+    if (!farmName || !crop || !seedingDate || !aoi || !aoi.geometry?.coordinates) {
       alert('Please fill out all fields and select an AOI.');
       return;
     }
-
+  
+    alert("setting project data")
     const projectData = {
       farm_name: farmName,
       crop,
       seeding_date: seedingDate,
-      aoi: aoi.features[0].geometry.coordinates, // Extract AOI coordinates
+      aoi: aoi.geometry.coordinates, // Directly access coordinates
       created_at: new Date().toISOString(),
     };
-
+    
+    alert("set project data")
     console.log('Submitting Project Data:', projectData);
     alert('Project Created Successfully!');
   };
@@ -88,7 +109,7 @@ const CreateProject = () => {
             <Typography>Farm Name: {farmName}</Typography>
             <Typography>Crop: {crop}</Typography>
             <Typography>Seeding Date: {seedingDate}</Typography>
-            <Typography>AOI Coordinates: {JSON.stringify(aoi.features[0].geometry.coordinates)}</Typography>
+            <Typography>AOI Coordinates: {JSON.stringify(aoi.geometry.coordinates)}</Typography>
           </Box>
         );
       default:
