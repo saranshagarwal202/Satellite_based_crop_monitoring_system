@@ -151,7 +151,7 @@ services:
           - ./job_runner/app:/app
         environment:
             - DATAMANAGER_URL=http://data_manager:5001
-            - PLANET_API_URL=http://test_planet_api:4999
+            - DATAFETCHER_URL=http://data_fetcher:5000
         deploy:
             resources:
                 limits:

@@ -142,16 +142,23 @@ async def add_project(request: Request, project_data: ProjectRequest, authorizat
         logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Add project failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
-@app.post("/api/external/projects/{project_id}/image", status_code=200)
-async def get_image(request: Request, project_id: str, image_data: ImageRequest, authorization: str = Header(None)):
+@app.post("/api/external/projects/{image_type}/image", status_code=200)
+async def get_image(request: Request,  image_type: str, authorization: str = Header(None)):
     try:
         logger = getLogger()
         verify_token(authorization, request.headers['user_id'])
         
         data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager/image/get"
+        data = await request.json()
+        config = {
+            "image_id": data["date_of_interest"],
+            "project_id": request.headers['project_id'],
+            "user_id": request.headers['user_id'],
+            "image_type": image_type
+        }
         
         async with httpx.AsyncClient() as client:
-            response = await client.post(data_manager_url, json={**image_data.dict(), "project_id": project_id}, headers={"user_id": request.headers['user_id']})
+            response = await client.post(data_manager_url, json=config, headers={"user_id": request.headers['user_id']})
         
         if response.status_code == 200:
             logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Image retrieved successfully")
@@ -162,6 +169,67 @@ async def get_image(request: Request, project_id: str, image_data: ImageRequest,
     except Exception as e:
         logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Get image failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+@app.get("/api/external/projects/{project_id}/download_images/status", status_code=200)
+async def get_image(request: Request,  project_id: str, authorization: str = Header(None)):
+    try:
+        logger = getLogger()
+        verify_token(authorization, request.headers['user_id'])
+        
+        data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager/project/status"
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(data_manager_url, json={"status": "running"}, headers={"user_id": request.headers['user_id'], 
+                                                                             "project_id": project_id})
+        if response.status_code == 200:
+            logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Image retrieved successfully")
+            return Response(content=response.content, status_code=200)
+        else:
+            logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Failed to retrieve image")
+            return Response(content="Failed to retrieve image", status_code=400)
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Get image failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+
+@app.post("/api/external/projects/{project_id}/download_images", status_code=200)
+async def download_images(request: Request,  project_id: str, authorization: str = Header(None)):
+    try:
+        logger = getLogger()
+        verify_token(authorization, request.headers['user_id'])
+        
+        
+        data_fetcher_url = f"{environ['DATAFETCHER_URL']}/api/internal/data_fetcher/download"
+        data = await request.json()
+        config = {
+            "start_date": data["date_of_interest"],
+            "end_date": data["date_of_interest"],
+            "project_id": project_id,
+            "aoi": data["aoi"],
+            "user_id": data.headers['user_id'],
+            "job_id": project_id,
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.post(data_fetcher_url, json=config, headers={"user_id": request.headers['user_id']})
+
+        data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager/project/status"
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(data_manager_url, json={"status": "running"}, headers={"user_id": request.headers['user_id'], 
+                                                                             "project_id": project_id})
+        
+        if response.status_code == 200:
+            logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Image retrieved successfully")
+            return Response(content=response.content, status_code=200)
+        else:
+            logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Failed to retrieve image")
+            return Response(content="Failed to retrieve image", status_code=400)
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Get image failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+
+
 
 def generate_token(user_id: str) -> str:
     expiration = datetime.utcnow() + timedelta(minutes=60)

@@ -87,12 +87,18 @@ def run_downloader(config: dict, running_processes: dict):
             # calculate ndvi and gci
             inf_cropped_image = cropped_image
             inf_cropped_image[inf_cropped_image==0] = -np.inf
-            ndvi = np.mean((inf_cropped_image[:,:,3]-inf_cropped_image[:,:,2])/(inf_cropped_image[:,:,3]+inf_cropped_image[:,:,2]))
-            gci = np.mean((inf_cropped_image[:,:,3]/inf_cropped_image[:,:,1])-1)
+
+            ndvi_arr = (inf_cropped_image[:,:,3]-inf_cropped_image[:,:,2])/(inf_cropped_image[:,:,3]+inf_cropped_image[:,:,2])
+            gci_arr = (inf_cropped_image[:,:,3]/inf_cropped_image[:,:,1])-1
+
+            ndvi = np.mean(ndvi_arr)
+            gci = np.mean(gci_arr)
 
             byte_io = BytesIO()
             # Save the image to the BytesIO object
             png_image.save(byte_io, format="PNG")
+
+            ###### add the 
 
             # checking cloud info
             passed, cloud_cover_ratio = check_for_clouds(cropped_image, ratio=config['cloud_cover'])

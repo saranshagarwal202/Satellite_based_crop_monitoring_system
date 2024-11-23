@@ -3,11 +3,14 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from json import dumps, loads
 from logging import getLogger
-from sftp_communications import save_tif, save_png
+from sftp_communications import save_tif, save_png, load_png
 from pymongo import MongoClient
 from datetime import datetime
 from os import environ
 from bson import ObjectId
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from io import BytesIO
 
 client = MongoClient(f"mongodb://{environ['MONGO_DB_USERNAME']}:{environ['MONGO_DB_PASSWORD']}@{environ['MONGO_DB_URL']}:{environ['MONGO_DB_PORT']}/")
 db = client['metadata_store']
@@ -36,6 +39,25 @@ async def download_images(request: Request):
             {"_id": ObjectId(request.headers["project_id"])},
             {"$push": {"images": request.headers["image_id"], "ndvi": float(request.headers["ndvi"]), "gci": float(request.headers["gci"])}}
         )
+        project = list(db.projects.find_one({"_id": ObjectId(request.headers["project_id"])}))
+
+        # create NDVI and GCI plot over time
+        for img_type in ["ndvi", "gci"]:
+            images = [datetime.strptime(i[:8], "%Y%m%d") for i in project['images']]
+            fig, ax = plt.subplots()
+            ax.plot(images, project[img_type])
+            ax.scatter(images, project[img_type])
+            date_format = mdates.DateFormatter('%Y-%m-%d')
+            ax.xaxis.set_major_formatter(date_format)
+            plt.xticks(rotation=45)
+            ax.grid()
+            ax.set_title(f"{str.upper(img_type)} over time")
+            ax.set_xlabel("Date")
+            ax.set_ylabel(str.upper(img_type))
+            figfile = BytesIO()
+            plt.savefig(figfile, format='png')
+            save_png(figfile, img_type, img_type, request.headers["user_id"], request.headers["project_id"])
+            logger.info(f"Saved {img_type}")
         
         logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Added image: {request.headers['image_id']}")
         
@@ -45,10 +67,10 @@ async def download_images(request: Request):
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
 @app.post("/api/internal/data_manager/add_png", status_code=200)
-async def download_images(request: Request):
+async def add_png(request: Request):
     try:
         image = await request.body()
-        save_png(image, request.headers["image_id"], request.headers["user_id"], request.headers["project_id"])
+        save_png(image, request.headers["image_type"],  request.headers["image_id"], request.headers["user_id"], request.headers["project_id"])
         logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Added image: {request.headers['image_id']}")
 
         return Response(status_code=200, content="Added Successfully")
@@ -141,6 +163,23 @@ async def add_project(request: Request):
     except Exception as e:
         logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Project addition failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+@app.post("/api/internal/data_manager/image/get", status_code=200)
+async def get_image(request: Request):
+    try:
+        config = await request.body()
+        if config["image_type"] in ["ndvi", "gci"]:
+            config["image_id"] = config["image_type"]
+
+        image = load_png(config['image_type'], config["image_id"], config["user_id"], config["project_id"])
+        
+        logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Image Loaded: {config['image_id']}")
+        
+        return Response(status_code=200, content=image)
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Chat response failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host='0.0.0.0', port=5001, log_level="info", access_log=False)
