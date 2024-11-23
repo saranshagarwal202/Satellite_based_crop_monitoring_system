@@ -32,6 +32,8 @@ services:
             - job_runner_network
         volumes:
           - ./data_fetcher/app:/app
+        ports:
+          - 5702:5678
         deploy:
             resources:
                 limits:
@@ -60,6 +62,8 @@ services:
         networks:
             - job_runner_network
             - data_manager_network
+        ports:
+          - 5701:5678
         volumes:
           - ./data_manager/app:/app
         deploy:
@@ -140,6 +144,7 @@ services:
         container_name: job_runner
         ports:
             - "5002:5002"  
+            - 5700:5678
         networks:
             - job_runner_network
         volumes:

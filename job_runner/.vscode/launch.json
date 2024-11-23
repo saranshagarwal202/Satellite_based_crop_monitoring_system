@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Attach (remote debug)",
+            "type": "debugpy",
+            "request": "attach",
+            "port": 5700,
+            "host": "127.0.0.1",
+            "pathMappings": [
+                {
+                  "localRoot": "${workspaceFolder}/app",
+                  "remoteRoot": "."
+                }
+              ]
+        },
+
+        {
             "name": "app debugger",
             "type": "debugpy",
             "request": "launch",

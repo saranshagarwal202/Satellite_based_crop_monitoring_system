@@ -203,6 +203,8 @@ paths:
                                     type: string
                                 created_at:
                                     type: string
+                                seeding_date:
+                                    type: string
             responses:
                 '200':
                     description: Project added successfully

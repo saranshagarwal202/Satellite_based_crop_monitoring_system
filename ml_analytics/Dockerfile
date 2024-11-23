@@ -11,9 +11,8 @@ RUN apt-get update  && apt-get install -y python3-pip libcairo2-dev cmake build-
 RUN pip3 install --force-reinstall meson ninja
 COPY ./requirements.txt /requirements.txt
 RUN pip3 install -r requirements.txt
-RUN pip3 install debugpy
 
 COPY ./app /app
 WORKDIR /app
 
-CMD ["python3", "-m", "debugpy", "--listen", "0.0.0.0:5678", "main.py"]
+# CMD ["python3", "main.py"]

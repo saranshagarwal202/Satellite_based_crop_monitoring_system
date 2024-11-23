@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from json import dumps, loads
 from logging import getLogger
-from sftp_communications import save_tif
+from sftp_communications import save_tif, save_png
 from pymongo import MongoClient
 from datetime import datetime
 from os import environ
@@ -19,15 +19,38 @@ logger = getLogger()
 async def startup_event():
     if "users" not in db.list_collection_names():
         db.create_collection("users")
+        logger.info("users found")
     if "projects" not in db.list_collection_names():
         db.create_collection("projects")
+        logger.info("projects found")
+    # print("HERE")
 
 @app.post("/api/internal/data_manager/add_tif", status_code=200)
 async def download_images(request: Request):
     try:
         image = await request.body()
         save_tif(image, request.headers["image_id"], request.headers["user_id"], request.headers["project_id"])
+        
+        # Add code to update the project document
+        db.projects.update_one(
+            {"_id": ObjectId(request.headers["project_id"])},
+            {"$push": {"images": request.headers["image_id"], "ndvi": float(request.headers["ndvi"]), "gci": float(request.headers["gci"])}}
+        )
+        
         logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Added image: {request.headers['image_id']}")
+        
+        return Response(status_code=200, content="Added Successfully")
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Chat response failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+@app.post("/api/internal/data_manager/add_png", status_code=200)
+async def download_images(request: Request):
+    try:
+        image = await request.body()
+        save_png(image, request.headers["image_id"], request.headers["user_id"], request.headers["project_id"])
+        logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Added image: {request.headers['image_id']}")
+
         return Response(status_code=200, content="Added Successfully")
     except Exception as e:
         logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Chat response failed. {e.__class__.__name__}: {str(e)}")
@@ -74,8 +97,8 @@ async def get_projects(user_id: str = Header(None)):
         if user:
             project_ids = user.get("projects_id", [])
             projects = list(db.projects.find({"_id": {"$in": project_ids}}))
-            for project in projects:
-                project["_id"] = str(project["_id"])
+            # for project in projects:
+            #     project["_id"] = str(project["_id"])
             return JSONResponse(status_code=200, content=projects)
         else:
             return Response(status_code=404, content="User not found")
@@ -94,7 +117,11 @@ async def add_project(request: Request):
             "aoi": project_data["aoi"],
             "crop": project_data["crop"],
             "created_at": project_data["created_at"],
-            "user_id": user_id
+            "seeding_date": project_data["seeding_date"],
+            "user_id": user_id,
+            "images": [],
+            "ndvi": [],
+            "gci": []
         }
         
         already_exist = db.projects.find_one({"user_id": user_id, "farm_name": project_data["farm_name"]})
