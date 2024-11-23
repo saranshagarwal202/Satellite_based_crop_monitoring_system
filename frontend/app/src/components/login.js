@@ -12,31 +12,54 @@ function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();  
 
+  // const handleLogin = async () => {
+  //   try {
+  //     const response = await login(email, password);
+
+  //     if (response.status === 'success') {
+  //       const { user, token, expires_in } = response.data;
+  //       console.log('User:', user);
+  //       console.log('Token:', token);
+  //       console.log('Expires in:', expires_in);
+
+  //       // Store the token for session management
+  //       localStorage.setItem('authToken', token);
+  //       alert('Login successful!');
+
+  //       // Redirect to dashboard or a protected route
+  //       navigate('/dashboard');
+  //     } else {
+  //       // Show error message from API response
+  //       alert(`Error: ${response.message}`);
+  //     }
+  //   } catch (error) {
+  //     // General error handling for unexpected issues
+  //     alert('An unexpected error occurred. Please try again later.');
+  //   }
+  // };
+
   const handleLogin = async () => {
     try {
       const response = await login(email, password);
-
+  
       if (response.status === 'success') {
         const { user, token, expires_in } = response.data;
-        console.log('User:', user);
-        console.log('Token:', token);
-        console.log('Expires in:', expires_in);
-
-        // Store the token for session management
+  
+        // Store token and user ID
         localStorage.setItem('authToken', token);
+        localStorage.setItem('userId', user.id); // Assuming `user.id` is the user ID
         alert('Login successful!');
-
-        // Redirect to dashboard or a protected route
+  
+        // Redirect to dashboard
         navigate('/dashboard');
       } else {
-        // Show error message from API response
         alert(`Error: ${response.message}`);
       }
     } catch (error) {
-      // General error handling for unexpected issues
       alert('An unexpected error occurred. Please try again later.');
     }
   };
+  
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>

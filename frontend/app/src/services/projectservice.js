@@ -40,6 +40,7 @@ export const addUserProject = async (authorization, userId, projectData) => {
         },
       }
     );
+    alert('$$$$ made api call to create a new project $$$$')
     return { status: 'success', data: response.data };
   } catch (error) {
     return {

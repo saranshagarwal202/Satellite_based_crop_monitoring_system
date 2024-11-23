@@ -3,6 +3,7 @@ import { TextField, Button, Box, Typography, LinearProgress } from '@mui/materia
 import PolygonMarker from '../PolygonMarker/PolygonMarker.js';
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import './CreateProject.css'; // Import CSS for transitions and additional styling
+import { addUserProject } from '../../services/projectservice';
 
 const CreateProject = () => {
   const [step, setStep] = useState(1); // Track current step
@@ -35,25 +36,94 @@ const CreateProject = () => {
   //   alert('Project Created Successfully!');
   // };
 
-  const handleSubmit = () => {
-    if (!farmName || !crop || !seedingDate || !aoi || !aoi.geometry?.coordinates) {
-      alert('Please fill out all fields and select an AOI.');
+  // const handleSubmit = () => {
+  //   if (!farmName || !crop || !seedingDate || !aoi || !aoi.geometry?.coordinates) {
+  //     alert('Please fill out all fields and select an AOI.');
+  //     return;
+  //   }
+  
+  //   alert("setting project data")
+  //   const projectData = {
+  //     farm_name: farmName,
+  //     crop,
+  //     seeding_date: seedingDate,
+  //     aoi: aoi.geometry.coordinates, // Directly access coordinates
+  //     created_at: new Date().toISOString(),
+  //   };
+    
+  //   alert("set project data")
+  //   console.log('Submitting Project Data:', projectData);
+  //   alert('Project Created Successfully!');
+  // };
+
+  // const handleSubmit = async () => {
+  //   if (!farmName || !crop || !seedingDate || !aoi || !aoi.geometry?.coordinates) {
+  //     alert('Please fill out all fields and select an AOI.');
+  //     return;
+  //   }
+  
+  //   const projectData = {
+  //     farm_name: farmName,
+  //     crop,
+  //     seeding_date: seedingDate,
+  //     aoi: aoi.geometry.coordinates,
+  //     created_at: new Date().toISOString(),
+  //   };
+  
+  //   try {
+  //     // Replace with actual token and userId
+  //     const authorization = 'Bearer YOUR_ACCESS_TOKEN';
+  //     const userId = 'USER_ID';
+  
+  //     const response = await addUserProject(authorization, userId, projectData);
+  
+  //     if (response.status === 'success') {
+  //       alert('Project Created Successfully!');
+  //       console.log('API Response:', response.data);
+  //     } else {
+  //       alert(`Error: ${response.message}`);
+  //     }
+  //   } catch (error) {
+  //     alert('An unexpected error occurred.');
+  //     console.error(error);
+  //   }
+  // };
+const handleSubmit = async () => {
+  if (!farmName || !crop || !seedingDate || !aoi || !aoi.geometry?.coordinates) {
+    alert('Please fill out all fields and select an AOI.');
+    return;
+  }
+
+  const projectData = {
+    farm_name: farmName,
+    crop,
+    seeding_date: seedingDate,
+    aoi: aoi.geometry.coordinates,
+    created_at: new Date().toISOString(),
+  };
+
+  try {
+    const token = localStorage.getItem('authToken'); // Retrieve the token
+    const userId = localStorage.getItem('userId'); // Retrieve the user ID
+
+    if (!token || !userId) {
+      alert('User not authenticated.');
       return;
     }
-  
-    alert("setting project data")
-    const projectData = {
-      farm_name: farmName,
-      crop,
-      seeding_date: seedingDate,
-      aoi: aoi.geometry.coordinates, // Directly access coordinates
-      created_at: new Date().toISOString(),
-    };
-    
-    alert("set project data")
-    console.log('Submitting Project Data:', projectData);
-    alert('Project Created Successfully!');
-  };
+
+    const response = await addUserProject(token, userId, projectData);
+
+    if (response.status === 'success') {
+      alert('Project Created Successfully!');
+      console.log('API Response:', response.data);
+    } else {
+      alert(`Error: ${response.message}`);
+    }
+  } catch (error) {
+    alert('An unexpected error occurred.');
+    console.error(error);
+  }
+};
 
   const renderStepContent = () => {
     switch (step) {
