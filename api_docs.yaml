@@ -366,7 +366,7 @@ paths:
                 '400':
                     description: Failed to add project
 
-    /api/external/projects/{project_id}/images:
+    /api/external/projects/{project_id}/download_images:
         post:
             summary: Get images for a project
             parameters:
@@ -396,6 +396,12 @@ paths:
                                     type: string
                                 end_date:
                                     type: string
+                                aoi:
+                                    type: array
+                                    items:
+                                        type: array
+                                        items:
+                                            type: number
             responses:
                 '202':
                     description: Request accepted. Images are being downloaded in the background.
