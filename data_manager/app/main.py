@@ -97,8 +97,8 @@ async def get_projects(request: Request):
         if user:
             project_ids = user.get("projects_id", [])
             projects = list(db.projects.find({"_id": {"$in": project_ids}}))
-            # for project in projects:
-            #     project["_id"] = str(project["_id"])
+            for project in projects:
+                project["_id"] = str(project["_id"])
             return JSONResponse(status_code=200, content=projects)
         else:
             return Response(status_code=404, content="User not found")
