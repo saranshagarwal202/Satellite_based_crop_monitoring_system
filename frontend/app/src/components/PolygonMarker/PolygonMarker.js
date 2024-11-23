@@ -55,17 +55,13 @@ function PolygonMarker({ onAoiSubmit }) {
   
   
   const freezePolygon = () => {
-    console.log('GeoJSON Data at Freeze:', geoJsonData); // Log geoJsonData before validation
-    if (geoJsonData && geoJsonData.geometry && geoJsonData.geometry.coordinates.length > 0) {
-      setIsEditable(false);
-      if (onAoiSubmit) {
-        console.log("$$ AOI SUBMIT CLICKED", geoJsonData);
-        onAoiSubmit(geoJsonData);
-      }
+    if (geoJsonData) {
+      onAoiSubmit(geoJsonData);
     } else {
       alert('Please draw a polygon before freezing.');
     }
   };
+  
 
   return (
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>

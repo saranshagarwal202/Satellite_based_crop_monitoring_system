@@ -47,7 +47,7 @@ function Login() {
   
         // Store token and user ID
         localStorage.setItem('authToken', token);
-        localStorage.setItem('userId', user.id); // Assuming `user.id` is the user ID
+        localStorage.setItem('userId', user); // Assuming `user.id` is the user ID
         alert('Login successful!');
   
         // Redirect to dashboard

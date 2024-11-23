@@ -32,6 +32,7 @@ export const addUserProject = async (authorization, userId, projectData) => {
         aoi: projectData.aoi,
         crop: projectData.crop,
         created_at: projectData.created_at,
+        seeding_date: projectData.seeding_date,
       },
       {
         headers: {

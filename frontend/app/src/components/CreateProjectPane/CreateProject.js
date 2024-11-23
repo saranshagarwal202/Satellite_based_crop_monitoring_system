@@ -98,7 +98,7 @@ const handleSubmit = async () => {
     farm_name: farmName,
     crop,
     seeding_date: seedingDate,
-    aoi: aoi.geometry.coordinates,
+    aoi: aoi.geometry.coordinates[0],
     created_at: new Date().toISOString(),
   };
 
@@ -179,7 +179,7 @@ const handleSubmit = async () => {
             <Typography>Farm Name: {farmName}</Typography>
             <Typography>Crop: {crop}</Typography>
             <Typography>Seeding Date: {seedingDate}</Typography>
-            <Typography>AOI Coordinates: {JSON.stringify(aoi.geometry.coordinates)}</Typography>
+            <Typography>AOI Coordinates: {JSON.stringify(aoi.geometry.coordinates[0])}</Typography>
           </Box>
         );
       default:
