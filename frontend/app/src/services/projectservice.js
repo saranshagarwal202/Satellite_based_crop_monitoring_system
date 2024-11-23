@@ -51,6 +51,37 @@ export const addUserProject = async (authorization, userId, projectData) => {
   }
 };
 
+export const downloadProjectImages = async (authorization, userId, projectId, dateRange) => {
+  try {
+    const response = await jobRunnerInstance.post(
+      `/api/external/projects/${projectId}/download_images`,
+      {
+        start_date: dateRange.start_date,
+        end_date: dateRange.end_date,
+      },
+      {
+        headers: {
+          authorization,
+          user_id: userId,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (response.status === 202) {
+      return { status: 'success', message: 'Images are being downloaded in the background.' };
+    } else {
+      return { status: 'error', message: 'Failed to initiate image download.' };
+    }
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
+
+
 export const getImageForProject = async (authorization, userId, projectId, imageRequest) => {
   try {
     const response = await jobRunnerInstance.post(
@@ -66,6 +97,43 @@ export const getImageForProject = async (authorization, userId, projectId, image
       }
     );
     return { status: 'success', data: response.data };
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
+
+export const getImageByTypeAndDate = async (authorization, userId, projectId, imageType, dateOfInterest) => {
+  try {
+    const response = await jobRunnerInstance.post(
+      `/api/external/projects/${imageType}/image`,
+      {
+        date_of_interest: dateOfInterest,
+      },
+      {
+        headers: {
+          authorization,
+          user_id: userId,
+          project_id: projectId,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'blob', 
+      }
+    );
+
+    if (response.status === 200) {
+      return {
+        status: 'success',
+        data: response.data, 
+      };
+    } else {
+      return {
+        status: 'error',
+        message: 'Failed to retrieve the image.',
+      };
+    }
   } catch (error) {
     return {
       status: 'error',
