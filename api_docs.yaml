@@ -433,11 +433,23 @@ paths:
                 '500':
                     description: Internal server error.
     
-    /api/external/projects/{project_id}/image:
+    /api/external/projects/{image_type}/image:
         post:
             summary: Get image at date for a project
             parameters:
                 - in: path
+                  name: image_type
+                  required: true
+                  schema:
+                      type: string
+                      enum:
+                        - sat
+                        - sat_ndvi
+                        - sat_gci
+                        - ndvi 
+                        - gci
+                        - yield
+                - in: header
                   name: project_id
                   required: true
                   schema:
