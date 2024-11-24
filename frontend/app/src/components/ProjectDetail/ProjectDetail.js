@@ -32,6 +32,12 @@ const ProjectDetail = ({ projectData, userId, authorization }) => {
     setSelectedDate(dates[0] || ''); // Set first date as default
   }, [project.images]);
 
+  useEffect(() => {
+    if (projectData) {
+      alert(`$$$$$ Project Data: ${JSON.stringify(projectData, null, 2)}`);
+    }
+  }, [projectData]);
+
   // Handle fetching images for specific image type and date
 //   const fetchImageForTypeAndDate = async (imageType) => {
 //     if (!selectedDate) {
