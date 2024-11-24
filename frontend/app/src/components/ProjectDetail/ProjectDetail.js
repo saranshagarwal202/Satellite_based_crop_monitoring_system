@@ -207,20 +207,32 @@ const renderContent = () => {
   
     if (fetchedImage) {
       return (
-        <Box
+        <Box>
           sx={{
             height: '300px',
-            backgroundImage: `url(${fetchedImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            borderRadius: '10px',
+          padding: '10px 20px', // Padding around the image
+          backgroundColor: '#f9f9f9',
+          borderRadius: '10px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          }}
+          <img
+          src={fetchedImage}
+          alt="Fetched"
+          style={{
+            maxWidth: '90%',
+            maxHeight: '80%',
+            objectFit: 'contain', // Maintain aspect ratio
+            borderRadius: '8px', // Rounded corners for the image
           }}
         />
+        </Box>
       );
     }
   
     return (
-      <Box
+        <Box
         sx={{
           height: '300px',
           backgroundColor: '#e0e0e0',
