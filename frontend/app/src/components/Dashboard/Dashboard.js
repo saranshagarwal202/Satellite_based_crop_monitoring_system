@@ -173,7 +173,11 @@ const Dashboard = () => {
       <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
         <div style={{ padding: '20px', flexGrow: 1 }}>
           {selectedProject ? (
-            <ProjectDetail projectData={selectedProject} />
+            <ProjectDetail
+            projectData={selectedProject}
+            userId={localStorage.getItem('userId')} // Pass userId
+            authorization={localStorage.getItem('authToken')} // Pass authorization
+          />
           ) : (
             <h1>Select a project to view details</h1>
           )}

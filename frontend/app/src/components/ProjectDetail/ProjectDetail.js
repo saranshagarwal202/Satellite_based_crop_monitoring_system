@@ -38,6 +38,10 @@ const ProjectDetail = ({ projectData, userId, authorization }) => {
     }
   }, [projectData]);
 
+//   useEffect(() => {
+//     alert(`Authorization: ${authorization}, User ID: ${userId}, Project ID: ${projectData?.id}`);
+//   }, [authorization, userId, projectData]);
+
   // Handle fetching images for specific image type and date
 //   const fetchImageForTypeAndDate = async (imageType) => {
 //     if (!selectedDate) {
