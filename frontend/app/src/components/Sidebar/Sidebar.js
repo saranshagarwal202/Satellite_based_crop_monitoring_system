@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 function Sidebar({ onProjectSelect, user, projects }) {
   // Debugging: Log the `projects` and `user` props
-  console.log('Projects received in Sidebar:', projects);
-  console.log('User received in Sidebar:', user);
+//   console.log('Projects received in Sidebar:', projects);
+//   console.log('User received in Sidebar:', user);
 
   const navigate = useNavigate();
 
