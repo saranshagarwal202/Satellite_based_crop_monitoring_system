@@ -90,6 +90,7 @@ async def login(request: Request, login_data: LoginRequest):
             logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - User logged in successfully")
             return Response(content=dumps({
                 "user": user_data["_id"],
+                "name": user_data["name"],
                 "token": token,
                 "expires_in": expires_in,
                 "PLANET_API_KEY": user_data["PLANET_API_KEY"]
