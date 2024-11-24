@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Button, Box, TextField, Menu, MenuItem } from '@mui/material';
-import { downloadImagesForProject, getImageForProject } from '../../services/projectservice';
+import { downloadImagesForProject, getImageForProject, getImageDownloadStatus, getUserProjects, getImageByTypeAndDate } from '../../services/projectservice';
 
 const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
   const [selectedButton, setSelectedButton] = useState('Satellite Image');
@@ -31,6 +31,17 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
     setAvailableDates([...new Set(dates)]); // Remove duplicates
     setSelectedDate(dates[0] || ''); // Set first date as default
   }, [project.images]);
+
+  useEffect(() => {
+    // Fetch the first satellite image if available and no image is loaded yet
+    if (project.images.length > 0 && !fetchedImage) {
+      const firstDate = project.images[0].split('_')[0];
+      const formattedDate = `${firstDate.slice(0, 4)}-${firstDate.slice(4, 6)}-${firstDate.slice(6, 8)}`;
+      setSelectedDate(formattedDate); // Set the first date as the default selected date
+      fetchImageForTypeAndDate('sat'); // Fetch the first satellite image by default
+    }
+  }, [project.images, fetchedImage]);
+  
 
 //   useEffect(() => {
 //     if (projectData) {
@@ -68,33 +79,102 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
 //     }
 //   };
 
-    const fetchImageForTypeAndDate = async (imageType) => {
-        if (!selectedDate) {
-        alert('Please select a valid date.');
-        return;
-        }
-    
+    const refreshProjectData = async () => {
         try {
-        setIsImageLoading(true); // Set loading to true
-        const imageRequest = {
-            date_of_interest: selectedDate,
-        };
-        const result = await getImageForProject(authorization, userId, project.id, imageRequest);
-    
+        const result = await getUserProjects(authorization, userId); // Assuming this API refreshes project data
         if (result.status === 'success') {
-            const imageBlob = result.data;
-            const imageURL = URL.createObjectURL(imageBlob);
-            setFetchedImage(imageURL); // Update the fetched image
-        } else {
-            alert(`Failed to fetch image: ${result.message}`);
+            const updatedProject = result.data.find((p) => p.id === project.id); // Find the current project
+            if (updatedProject) {
+            setAvailableDates(updatedProject.images.map((imageName) => {
+                const datePart = imageName.split('_')[0];
+                return `${datePart.slice(0, 4)}-${datePart.slice(4, 6)}-${datePart.slice(6, 8)}`;
+            }));
+            if (!selectedDate && updatedProject.images.length > 0) {
+                setSelectedDate(`${updatedProject.images[0].split('_')[0]}`); // Set default date
+            }
+            }
         }
         } catch (error) {
-        console.error('Error fetching image:', error);
-        alert('An error occurred while fetching the image.');
-        } finally {
-        setIsImageLoading(false); // Set loading to false
+        console.error('Error refreshing project data:', error);
         }
     };
+
+    const handleRefresh = async () => {
+        try {
+          // Call the refreshProjectData function to fetch updated project data
+          await refreshProjectData();
+      
+          // Optionally, you can reset the fetched image to ensure the first satellite image is loaded again
+          if (project.images.length > 0) {
+            const firstDate = project.images[0].split('_')[0];
+            const formattedDate = `${firstDate.slice(0, 4)}-${firstDate.slice(4, 6)}-${firstDate.slice(6, 8)}`;
+            setSelectedDate(formattedDate);
+            fetchImageForTypeAndDate('sat'); // Load the first satellite image again
+          }
+        } catch (error) {
+          console.error('Error refreshing project data:', error);
+          alert('An error occurred while refreshing the project data. Please try again.');
+        }
+      };
+  
+
+    // const fetchImageForTypeAndDate = async (imageType) => {
+    //     if (!selectedDate) {
+    //     alert('Please select a valid date.');
+    //     return;
+    //     }
+    
+    //     try {
+    //     setIsImageLoading(true); // Set loading to true
+    //     const imageRequest = {
+    //         date_of_interest: selectedDate,
+    //     };
+    //     const result = await getImageForProject(authorization, userId, project.id, imageRequest);
+    
+    //     if (result.status === 'success') {
+    //         const imageBlob = result.data;
+    //         const imageURL = URL.createObjectURL(imageBlob);
+    //         setFetchedImage(imageURL); // Update the fetched image
+    //     } else {
+    //         alert(`Failed to fetch image: ${result.message}`);
+    //     }
+    //     } catch (error) {
+    //     console.error('Error fetching image:', error);
+    //     alert('An error occurred while fetching the image.');
+    //     } finally {
+    //     setIsImageLoading(false); // Set loading to false
+    //     }
+    // };
+
+    const fetchImageForTypeAndDate = async (imageType) => {
+        if (!selectedDate) {
+          alert('Please select a valid date.');
+          return;
+        }
+      
+        try {
+          setIsImageLoading(true);
+          const imageRequest = { date_of_interest: selectedDate };
+          const result =
+            imageType === 'sat'
+              ? await getImageForProject(authorization, userId, project.id, imageRequest)
+              : await getImageByTypeAndDate(authorization, userId, project.id, imageType, selectedDate);
+      
+          if (result.status === 'success') {
+            const imageBlob = result.data;
+            const imageURL = URL.createObjectURL(imageBlob);
+            setFetchedImage(imageURL);
+          } else {
+            alert(`Failed to fetch image: ${result.message}`);
+          }
+        } catch (error) {
+          console.error('Error fetching image:', error);
+          alert('An error occurred while fetching the image.');
+        } finally {
+          setIsImageLoading(false);
+        }
+      };
+      
 
   // Handle downloading images
 //   const handleDownloadImages = () => {
@@ -138,6 +218,98 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
 //       setIsRunning(false);
 //     }
 //   };
+
+// const pollDownloadStatus = async (authorization, userId, projectId, maxAttempts, pollInterval) => {
+//     let attempts = 0;
+  
+//     const poll = async (resolve, reject) => {
+//       attempts++;
+//       try {
+//         const statusResult = await getImageDownloadStatus(authorization, userId, projectId);
+  
+//         if (statusResult.status === 'success') {
+//           if (statusResult.data.status === 'finished') {
+//             resolve('Download process completed.');
+//           } else if (attempts < maxAttempts) {
+//             setTimeout(() => poll(resolve, reject), pollInterval);
+//           } else {
+//             reject('Polling timed out after 30 minutes. Please check again later.');
+//           }
+//         } else {
+//           reject(`Error checking status: ${statusResult.message}`);
+//         }
+//       } catch (error) {
+//         reject(`Error during polling: ${error.message}`);
+//       }
+//     };
+  
+//     return new Promise(poll);
+//   };
+
+const pollDownloadStatus = async (authorization, userId, projectId, maxAttempts, pollInterval) => {
+    let attempts = 0;
+  
+    const poll = async (resolve, reject) => {
+      attempts++;
+      try {
+        const statusResult = await getImageDownloadStatus(authorization, userId, projectId);
+  
+        if (statusResult.status === 'success') {
+          if (statusResult.data.status === 'finished') {
+            await refreshProjectData(); // Refresh project data
+            resolve('Download process completed.');
+          } else if (attempts < maxAttempts) {
+            setTimeout(() => poll(resolve, reject), pollInterval);
+          } else {
+            reject('Polling timed out after 30 minutes. Please check again later.');
+          }
+        } else {
+          reject(`Error checking status: ${statusResult.message}`);
+        }
+      } catch (error) {
+        reject(`Error during polling: ${error.message}`);
+      }
+    };
+  
+    return new Promise(poll);
+  };  
+
+  
+// const handleDownloadImages = async () => {
+//     if (!startDate || !endDate) {
+//       alert('Please select both Start Date and End Date.');
+//       return;
+//     }
+  
+//     setIsRunning(true); // Show the running state immediately
+  
+//     try {
+//       const dateRange = { start_date: startDate, end_date: endDate };
+//       const result = await downloadImagesForProject(
+//         authorization,
+//         userId,
+//         project.id,
+//         dateRange,
+//         project.aoi,
+//         planetKey
+//       );
+  
+//       if (result.status === 'success') {
+//         alert(result.message);
+
+  
+//         // Keep "Status: Running..." enabled for now
+//         // Invoke Polling API
+//         // Update stuff accordingly
+//       } else {
+//         alert(result.message);
+//         setIsRunning(false); // If error occurs, allow interaction again
+//       }
+//     } catch (error) {
+//       alert(`An error occurred: ${error.message}`);
+//       setIsRunning(false); // If error occurs, allow interaction again
+//     }
+//   };  
 const handleDownloadImages = async () => {
     if (!startDate || !endDate) {
       alert('Please select both Start Date and End Date.');
@@ -160,8 +332,19 @@ const handleDownloadImages = async () => {
       if (result.status === 'success') {
         alert(result.message);
   
-        // Keep "Status: Running..." enabled for now
-        // Disables input fields and the button
+        // Start polling for status
+        const pollInterval = 30000; // Poll every 30 seconds
+        const maxAttempts = 60; // Stop after 60 attempts (30 minutes)
+  
+        try {
+          const statusMessage = await pollDownloadStatus(authorization, userId, project.id, maxAttempts, pollInterval);
+          alert(statusMessage);
+          setIsRunning(false);
+          // Reload or update project data here if necessary
+        } catch (error) {
+          alert(error);
+          setIsRunning(false);
+        }
       } else {
         alert(result.message);
         setIsRunning(false); // If error occurs, allow interaction again
@@ -170,7 +353,7 @@ const handleDownloadImages = async () => {
       alert(`An error occurred: ${error.message}`);
       setIsRunning(false); // If error occurs, allow interaction again
     }
-  };  
+  };
   
 
   // Render content based on the fetched image
@@ -500,20 +683,53 @@ const renderContent = () => {
 
 
       {/* Details Pane */}
-      <Box sx={{ border: '1px solid #ddd', borderRadius: '10px', padding: '20px', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)' }}>
-        {/* Top Section */}
-        <Box sx={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f2f2f2', borderRadius: '10px' }}>
-          <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#333' }}>
-            Farm Name: {project.name}
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#666' }}>
-            Seeding Date: {project.seedingDate}
-          </Typography>
-        </Box>
+<Box
+  sx={{
+    border: '1px solid #ddd',
+    borderRadius: '10px',
+    padding: '20px',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+  }}
+>
+  {/* Top Section */}
+  <Box
+    sx={{
+      marginBottom: '20px',
+      padding: '10px',
+      backgroundColor: '#f2f2f2',
+      borderRadius: '10px',
+      display: 'flex', // Add flex for layout
+      justifyContent: 'space-between', // Space between text and button
+      alignItems: 'center', // Align items vertically
+    }}
+  >
+    <Box>
+      <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#333' }}>
+        Farm Name: {project.name}
+      </Typography>
+      <Typography variant="body2" sx={{ color: '#666' }}>
+        Seeding Date: {project.seedingDate}
+      </Typography>
+    </Box>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={handleRefresh} // Add refresh logic here
+      sx={{
+        textTransform: 'none',
+        padding: '5px 15px',
+        borderRadius: '5px',
+        fontSize: '14px',
+      }}
+    >
+      Refresh
+    </Button>
+  </Box>
 
-        {/* Content Section */}
-        <Box sx={{ marginBottom: '20px' }}>{renderContent()}</Box>
-      </Box>
+  {/* Content Section */}
+  <Box sx={{ marginBottom: '20px' }}>{renderContent()}</Box>
+</Box>
+
     </Box>
   );
 };

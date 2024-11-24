@@ -183,3 +183,33 @@ export const downloadImagesForProject = async (authorization, userId, projectId,
   }
 };
 
+export const getImageDownloadStatus = async (authorization, userId, projectId) => {
+  try {
+    const response = await jobRunnerInstance.get(
+      `/api/external/projects/${projectId}/download_images/status`,
+      {
+        headers: {
+          authorization,
+          user_id: userId,
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      return {
+        status: 'success',
+        data: response.data, 
+      };
+    } else {
+      return {
+        status: 'error',
+        message: 'Failed to fetch download status.',
+      };
+    }
+  } catch (error) {
+    return {
+      status: 'error',
+      message: error.response?.data?.message || error.message,
+    };
+  }
+};
