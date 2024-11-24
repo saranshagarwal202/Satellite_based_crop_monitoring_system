@@ -164,7 +164,7 @@ export const downloadImagesForProject = async (authorization, userId, projectId,
       }
     );
 
-    if (response.status === 202) {
+    if (response.status === 200) {
       return {
         status: 'success',
         message: 'Images are being downloaded in the background.',

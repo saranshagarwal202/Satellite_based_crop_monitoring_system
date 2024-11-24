@@ -108,36 +108,69 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
 //       setIsRunning(false); // Simulate completion
 //     }, 3000);
 //   };
+// const handleDownloadImages = async () => {
+//     if (!startDate || !endDate) {
+//       alert('Please select both Start Date and End Date.');
+//       return;
+//     }
+  
+//     setIsRunning(true); // Show the running state
+  
+//     try {
+//       const dateRange = { start_date: startDate, end_date: endDate };
+//       const result = await downloadImagesForProject(
+//         authorization, 
+//         userId,        
+//         project.id,   
+//         dateRange,     
+//         project.aoi,
+//         planetKey    
+//       );
+  
+//       if (result.status === 'success') {
+//         alert(result.message); 
+//       } else {
+//         alert(result.message); 
+//       }
+//     } catch (error) {
+//       alert(`An error occurred: ${error.message}`);
+//     } finally {
+//       setIsRunning(false);
+//     }
+//   };
 const handleDownloadImages = async () => {
     if (!startDate || !endDate) {
       alert('Please select both Start Date and End Date.');
       return;
     }
   
-    setIsRunning(true); // Show the running state
+    setIsRunning(true); // Show the running state immediately
   
     try {
       const dateRange = { start_date: startDate, end_date: endDate };
       const result = await downloadImagesForProject(
-        authorization, 
-        userId,        
-        project.id,   
-        dateRange,     
+        authorization,
+        userId,
+        project.id,
+        dateRange,
         project.aoi,
-        planetKey    
+        planetKey
       );
   
       if (result.status === 'success') {
-        alert(result.message); 
+        alert(result.message);
+  
+        // Keep "Status: Running..." enabled for now
+        // Disables input fields and the button
       } else {
-        alert(result.message); 
+        alert(result.message);
+        setIsRunning(false); // If error occurs, allow interaction again
       }
     } catch (error) {
       alert(`An error occurred: ${error.message}`);
-    } finally {
-      setIsRunning(false);
+      setIsRunning(false); // If error occurs, allow interaction again
     }
-  };
+  };  
   
 
   // Render content based on the fetched image
@@ -151,7 +184,7 @@ const handleDownloadImages = async () => {
 //             backgroundSize: 'cover',
 //             backgroundPosition: 'center',
 //             borderRadius: '10px',
-//           }}
+//           }
 //         />
 //       );
 //     }
@@ -223,7 +256,7 @@ const renderContent = () => {
           marginBottom: '20px',
         }}
       >
-        <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+        {/* <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <TextField
             label="Start Date"
             type="date"
@@ -262,11 +295,54 @@ const renderContent = () => {
           }}
         >
           Download New Images
-        </Button>
+        </Button> 
+        </Box>
+        */}
+        <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+  <TextField
+    label="Start Date"
+    type="date"
+    value={startDate}
+    onChange={(e) => setStartDate(e.target.value)}
+    InputLabelProps={{ shrink: true }}
+    disabled={isRunning} // Disable while running
+    sx={{ width: '200px' }}
+  />
+  <TextField
+    label="End Date"
+    type="date"
+    value={endDate}
+    onChange={(e) => setEndDate(e.target.value)}
+    InputLabelProps={{ shrink: true }}
+    disabled={isRunning} // Disable while running
+    sx={{ width: '200px' }}
+  />
+</Box>
+<Box sx={{ textAlign: 'center', flex: 1, marginLeft: '20px', fontWeight: 'bold', color: '#666' }}>
+  {isRunning ? 'Status: Running...' : ''}
+</Box>
+<Button
+  onClick={handleDownloadImages}
+  disabled={isRunning} // Disable button while running
+  sx={{
+    textTransform: 'none',
+    color: 'white',
+    fontWeight: 'bold',
+    backgroundColor: isRunning ? '#B0BEC5' : '#007AFF', // Change color if disabled
+    padding: '10px 30px',
+    borderRadius: '10px',
+    '&:hover': {
+      backgroundColor: isRunning ? '#B0BEC5' : '#005BBB',
+    },
+  }}
+>
+  Download New Images
+</Button>
+
       </Box>
 
       {/* Clickable Date Dropdown */}
-      <Box
+      {/* <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -342,7 +418,86 @@ const renderContent = () => {
             </Button>
           ))}
         </Box>
-      </Box>
+      </Box> */}
+      <Box
+  sx={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '10px 20px',
+    backgroundColor: '#f9f9f9',
+    borderRadius: '10px',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+    marginBottom: '20px',
+  }}
+>
+  <Typography
+    variant="h6"
+    onClick={(e) => availableDates.length > 0 && setAnchorEl(e.currentTarget)}
+    sx={{
+      fontWeight: 'bold',
+      color: availableDates.length > 0 ? '#007AFF' : '#999',
+      cursor: availableDates.length > 0 ? 'pointer' : 'not-allowed',
+      '&:hover': availableDates.length > 0 ? { textDecoration: 'underline' } : {},
+    }}
+  >
+    {availableDates.length > 0 ? selectedDate || 'Select a date' : 'No dates available'}
+  </Typography>
+  <Menu
+    anchorEl={anchorEl}
+    open={Boolean(anchorEl)}
+    onClose={() => setAnchorEl(null)}
+    sx={{
+      mt: 1,
+      '& .MuiPaper-root': {
+        borderRadius: '8px',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+      },
+    }}
+  >
+    {availableDates.map((date) => (
+      <MenuItem
+        key={date}
+        onClick={() => {
+          setSelectedDate(date);
+          setAnchorEl(null);
+        }}
+        sx={{
+          fontWeight: selectedDate === date ? 'bold' : 'normal',
+          color: selectedDate === date ? '#007AFF' : '#333',
+          '&:hover': {
+            backgroundColor: '#f9f9f9',
+          },
+        }}
+      >
+        {date}
+      </MenuItem>
+    ))}
+  </Menu>
+  <Box sx={{ display: 'flex', gap: '10px' }}>
+    {['sat', 'sat_ndvi', 'sat_gci', 'ndvi', 'gci', 'yield'].map((label, index) => (
+      <Button
+        key={label}
+        onClick={() => fetchImageForTypeAndDate(label)}
+        disabled={availableDates.length === 0} // Disable buttons if no dates
+        sx={{
+          textTransform: 'none',
+          fontWeight: selectedButton === label ? 'bold' : 'normal',
+          color: selectedButton === label ? 'white' : availableDates.length > 0 ? '#007AFF' : '#999',
+          backgroundColor: selectedButton === label ? '#007AFF' : 'transparent',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          '&:hover': availableDates.length > 0
+            ? { backgroundColor: selectedButton === label ? '#005BBB' : '#f2f2f2' }
+            : {},
+        }}
+      >
+        {['Satellite Image', 'NDVI Heat Map', 'GCI Heat Map', 'NDVI Plot', 'GCI Plot', 'Yield Estimate'][index]}
+      </Button>
+    ))}
+  </Box>
+</Box>
+
 
       {/* Details Pane */}
       <Box sx={{ border: '1px solid #ddd', borderRadius: '10px', padding: '20px', boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)' }}>
