@@ -67,7 +67,7 @@ function PolygonMarker({ onAoiSubmit }) {
     <div style={{ height: '100%', width: '100%', position: 'relative' }}>
       <MapContainer
         // center={[30.62798, -96.33441]}
-        center={[27.6679112, -97.6852213]}
+        center={[27.668058, -97.688393]}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
         ref={mapRef}
