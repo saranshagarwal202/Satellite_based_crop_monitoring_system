@@ -209,8 +209,8 @@ const handleDownloadImages = async () => {
       return (
         <Box
           sx={{
-            height: '300px',
-            padding: '10px 20px', // Padding around the image
+            width: '100%', // Full width of the content pane
+            padding: '20px', // Visually pleasing padding
             backgroundColor: '#f9f9f9',
             borderRadius: '10px',
             display: 'flex',
@@ -222,9 +222,9 @@ const handleDownloadImages = async () => {
             src={fetchedImage}
             alt="Fetched"
             style={{
-              maxWidth: '90%',
-              maxHeight: '80%',
-              objectFit: 'contain', // Maintain aspect ratio
+              width: 'calc(100% - 40px)', // Adapt to content pane width minus padding (horizontal padding x2)
+              height: 'auto', // Retain aspect ratio
+              objectFit: 'contain',
               borderRadius: '8px', // Rounded corners for the image
             }}
           />
@@ -246,7 +246,7 @@ const handleDownloadImages = async () => {
         No Image Available
       </Box>
     );
-  };   
+  };  
 
   return (
     <Box sx={{ fontFamily: 'Arial, sans-serif', padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
