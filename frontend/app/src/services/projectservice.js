@@ -82,7 +82,7 @@ export const downloadProjectImages = async (authorization, userId, projectId, da
 };
 
 
-export const getImageForProject = async (authorization, userId, projectId, imageRequest, planetKey) => {
+export const getImageForProject = async (authorization, userId, projectId, imageRequest) => {
   try {
     const response = await jobRunnerInstance.post(
       `/api/external/projects/${projectId}/image`, 
@@ -93,7 +93,6 @@ export const getImageForProject = async (authorization, userId, projectId, image
         headers: {
           authorization,
           user_id: userId,
-          PLANET_API_KEY: planetKey,
         },
       }
     );
@@ -143,7 +142,7 @@ export const getImageByTypeAndDate = async (authorization, userId, projectId, im
   }
 };
 
-export const downloadImagesForProject = async (authorization, userId, projectId, dateRange, aoi) => {
+export const downloadImagesForProject = async (authorization, userId, projectId, dateRange, aoi, planetKey) => {
   // alert(
   //   `IN request\nAuth: ${authorization}\nUserId: ${userId}\nProjID: ${projectId}\nDate Range: ${JSON.stringify(dateRange)}\nAOI: ${JSON.stringify(aoi)}`
   // );
@@ -154,6 +153,7 @@ export const downloadImagesForProject = async (authorization, userId, projectId,
         start_date: dateRange.start_date,
         end_date: dateRange.end_date,
         aoi: aoi, 
+        PLANET_API_KEY: planetKey,
       },
       {
         headers: {
