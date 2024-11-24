@@ -104,14 +104,18 @@ def run_downloader(config: dict, running_processes: dict):
             scene = rasterio.open(scene, mode='r')
             cropped_image, transform = cropping(tif_src=scene, AOI_points=config["aoi"])
 
-            png_image = Image.fromarray(cropped_image[:,:,:3])
+            png_image = Image.fromarray(cropped_image[:3,:,:].transpose(1,2,0))
 
             # calculate ndvi and gci
             inf_cropped_image = cropped_image
+            inf_cropped_image = inf_cropped_image.astype(np.float32)
             inf_cropped_image[inf_cropped_image==0] = -np.inf
 
-            ndvi_arr = (inf_cropped_image[:,:,3]-inf_cropped_image[:,:,2])/(inf_cropped_image[:,:,3]+inf_cropped_image[:,:,2])
-            gci_arr = (inf_cropped_image[:,:,3]/inf_cropped_image[:,:,1])-1
+            ndvi_arr = (inf_cropped_image[3,:,:]-inf_cropped_image[0,:,:])/(inf_cropped_image[3,:,:]+inf_cropped_image[0,:,:])
+            gci_arr = (inf_cropped_image[3,:,:]/inf_cropped_image[1,:,:])-1
+
+            ndvi_arr = np.nan_to_num(ndvi_arr)
+            gci_arr = np.nan_to_num(gci_arr)
 
 
             ndvi = np.mean(ndvi_arr)
@@ -120,42 +124,53 @@ def run_downloader(config: dict, running_processes: dict):
             byte_io = BytesIO()
             # Save the image to the BytesIO object
             png_image.save(byte_io, format="PNG")
+            byte_io.seek(0)
 
             # create heatmap for ndvi and gci
             ndvi_img = BytesIO()
+            plt.figure()
             plt.imshow(ndvi_arr, cmap= "viridis")
             plt.colorbar(label="NDVI", shrink=0.5)
             plt.axis('off')
-            plt.savefig(ndvi_img, format='png')
+            plt.title('NDVI')
+            plt.savefig(ndvi_img, format='png', bbox_inches='tight')
+            ndvi_img.seek(0)
 
             gci_img = BytesIO()
+            plt.figure()
             plt.imshow(gci_arr, cmap= "viridis")
             plt.colorbar(label="GCI", shrink=0.5)
             plt.axis('off')
-            plt.savefig(gci_img, format='png')
+            plt.title('GCI')
+            plt.savefig(gci_img, format='png', bbox_inches='tight')
+            gci_img.seek(0)
 
             # calculating yield
             ## <ToDo> hardcoding N-days from seeding for presentation
-            n_days_from_seeding = [n_days_from_seeding for j in range(ndvi.shape[0])]
-            yield_ = np.zeros(ndvi.shape)
+            n_days_from_seeding = 40
+            n_days_from_seeding = [n_days_from_seeding for j in range(ndvi_arr.shape[0])]
+            yield_ = np.zeros(ndvi_arr.shape)
             # Create a feature array
-            for i in range(ndvi.shape[-1]):
+            for i in range(ndvi_arr.shape[-1]):
                 # features = np.column_stack((temp_arr, ndvi, gci))
                 feature_names = ['n_days_from_seeding', 'ndvi', 'gci']
-                features_df = pd.DataFrame({'n_days_from_seeding': n_days_from_seeding,'ndvi': ndvi[:,i],'gci': gci[:,i]})
+                features_df = pd.DataFrame({'n_days_from_seeding': n_days_from_seeding,'ndvi': ndvi_arr[:,i],'gci': gci_arr[:,i]})
                 # Generate predictions
                 yield_[:,i] = model.predict(features_df)
             yield_ = np.clip(yield_, 0, 40)
             yield_img = BytesIO()
-            plt.imshow(yield_img, cmap= "viridis")
+            plt.figure()
+            plt.imshow(yield_, cmap= "viridis")
             plt.colorbar(label="Yield", shrink=0.5)
             plt.axis('off')
-            plt.savefig(yield_img, format='png')
+            plt.title('Yield (in kgs)')
+            plt.savefig(yield_img, format='png', bbox_inches='tight')
+            yield_img.seek(0)
 
 
 
             # checking cloud info
-            passed, cloud_cover_ratio = check_for_clouds(cropped_image, ratio=config['cloud_cover'])
+            passed, cloud_cover_ratio = check_for_clouds(cropped_image, ratio=config.get('cloud_cover', 0.1))
 
             # dumping cropped image
             profile = scene.profile
@@ -172,13 +187,13 @@ def run_downloader(config: dict, running_processes: dict):
 
 
             # image: bytes, cloud_cover_ratio: float, transform: tuple, image_id: str, user_id: str, project_id: str
-            send_to_data_manager(file.read(), byte_io, ndvi_img, gci_img, yield_img, ndvi, gci, cloud_cover_ratio, transform, image_id, config["user_id"], config["project_id"])
+            send_to_data_manager(file.read(), byte_io.read(), ndvi_img.read(), gci_img.read(), yield_img.read(), ndvi, gci, cloud_cover_ratio, transform, image_id, config["user_id"], config["project_id"])
         
         logger.info(f"Finished processing request for user:{config['user_id']}")
 
         # send status to data manager
         response = post(f"{datamanager_url}/api/internal/data_manager/project/status", 
-                        data={"status": "finished"},
+                        json={"status": "finished"},
                         headers={"user_id": config["user_id"], "project_id": config["project_id"]})
                         # headers={'user_id': user_id, 'project_id': project_id, 'image_id': image_id})
         response.raise_for_status()

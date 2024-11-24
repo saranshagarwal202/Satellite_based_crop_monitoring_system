@@ -93,13 +93,24 @@ def load_png(image_type: str, imageId: str, userId: str, projectId: str):
     logger = getLogger()
 
     try:
+        imageId = imageId.replace('-', '')
         transport = paramiko.Transport(
             (environ.get("SFTP_HOST"), int(environ.get("SFTP_PORT"))))
         transport.connect(None, environ.get("SFTP_USER"),
                           environ.get("SFTP_PASS"))
         sftp = paramiko.SFTPClient.from_transport(transport)
 
-        file = sftp.open(f"/upload/crop_yield_prediction/{userId}/{projectId}/{imageId}.{image_type}.png", "rb")
+        # imageId is a string here like '2023-05-17' reference an image
+        files_image_ids = sftp.listdir(f"/upload/crop_yield_prediction/{userId}/{projectId}/")
+        for file_name in files_image_ids:
+            file_splitted = file_name.split('.')
+            if len(file_splitted)==3:
+                if file_splitted[1]==image_type and file_splitted[0][:8] == imageId:
+                    
+                    found_file_name = file_name
+                    break
+
+        file = sftp.open(f"/upload/crop_yield_prediction/{userId}/{projectId}/{found_file_name}", "rb")
         image = file.read()
 
         file.close()

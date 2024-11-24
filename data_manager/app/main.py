@@ -29,7 +29,7 @@ async def startup_event():
     # print("HERE")
 
 @app.post("/api/internal/data_manager/add_tif", status_code=200)
-async def download_images(request: Request):
+async def add_tiff(request: Request):
     try:
         image = await request.body()
         save_tif(image, request.headers["image_id"], request.headers["user_id"], request.headers["project_id"])
@@ -39,7 +39,7 @@ async def download_images(request: Request):
             {"_id": ObjectId(request.headers["project_id"])},
             {"$push": {"images": request.headers["image_id"], "ndvi": float(request.headers["ndvi"]), "gci": float(request.headers["gci"])}}
         )
-        project = list(db.projects.find_one({"_id": ObjectId(request.headers["project_id"])}))
+        project = db.projects.find_one({"_id": ObjectId(request.headers["project_id"])})
 
         # create NDVI and GCI plot over time
         for img_type in ["ndvi", "gci"]:
@@ -55,8 +55,9 @@ async def download_images(request: Request):
             ax.set_xlabel("Date")
             ax.set_ylabel(str.upper(img_type))
             figfile = BytesIO()
-            plt.savefig(figfile, format='png')
-            save_png(figfile, img_type, img_type, request.headers["user_id"], request.headers["project_id"])
+            plt.savefig(figfile, format='png', bbox_inches='tight')
+            figfile.seek(0)
+            save_png(figfile.read(), img_type, img_type, request.headers["user_id"], request.headers["project_id"])
             logger.info(f"Saved {img_type}")
         
         logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Added image: {request.headers['image_id']}")
@@ -185,22 +186,21 @@ async def modify_status(request: Request):
 @app.get("/api/internal/data_manager/project/status", status_code=200)
 async def retrive_status(request: Request):
     try:
-        data = await request.json()
         user_id = request.headers.get("user_id")
         
         status = db.projects.find_one({"_id": ObjectId(request.headers['project_id'])})['status']
         
-        logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Status Modified")
+        logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Status Retrival")
         return JSONResponse(status_code=200, content={"status": status})
     except Exception as e:
-        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Project addition failed. {e.__class__.__name__}: {str(e)}")
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Status retrival failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
 
 @app.post("/api/internal/data_manager/image/get", status_code=200)
 async def get_image(request: Request):
     try:
-        config = await request.body()
+        config = await request.json()
         if config["image_type"] in ["ndvi", "gci"]:
             config["image_id"] = config["image_type"]
 
