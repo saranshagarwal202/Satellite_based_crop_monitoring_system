@@ -42,43 +42,6 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
     }
   }, [project.images, fetchedImage]);
   
-
-//   useEffect(() => {
-//     if (projectData) {
-//       alert(`$$$$$ Project Data: ${JSON.stringify(projectData, null, 2)}`);
-//     }
-//   }, [projectData]);
-
-//   useEffect(() => {
-//     alert(`Authorization: ${authorization}, User ID: ${userId}, Project ID: ${projectData?.id}`);
-//   }, [authorization, userId, projectData]);
-
-  // Handle fetching images for specific image type and date
-//   const fetchImageForTypeAndDate = async (imageType) => {
-//     if (!selectedDate) {
-//       alert('Please select a valid date.');
-//       return;
-//     }
-
-//     try {
-//       const imageRequest = {
-//         date_of_interest: selectedDate,
-//       };
-//       const result = await getImageForProject(authorization, userId, project._id, imageRequest);
-
-//       if (result.status === 'success') {
-//         const imageBlob = result.data;
-//         const imageURL = URL.createObjectURL(imageBlob);
-//         setFetchedImage(imageURL); // Update the fetched image
-//       } else {
-//         alert(`Failed to fetch image: ${result.message}`);
-//       }
-//     } catch (error) {
-//       console.error('Error fetching image:', error);
-//       alert('An error occurred while fetching the image.');
-//     }
-//   };
-
     const refreshProjectData = async () => {
         try {
         const result = await getUserProjects(authorization, userId); // Assuming this API refreshes project data
@@ -116,35 +79,6 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
           alert('An error occurred while refreshing the project data. Please try again.');
         }
       };
-  
-
-    // const fetchImageForTypeAndDate = async (imageType) => {
-    //     if (!selectedDate) {
-    //     alert('Please select a valid date.');
-    //     return;
-    //     }
-    
-    //     try {
-    //     setIsImageLoading(true); // Set loading to true
-    //     const imageRequest = {
-    //         date_of_interest: selectedDate,
-    //     };
-    //     const result = await getImageForProject(authorization, userId, project.id, imageRequest);
-    
-    //     if (result.status === 'success') {
-    //         const imageBlob = result.data;
-    //         const imageURL = URL.createObjectURL(imageBlob);
-    //         setFetchedImage(imageURL); // Update the fetched image
-    //     } else {
-    //         alert(`Failed to fetch image: ${result.message}`);
-    //     }
-    //     } catch (error) {
-    //     console.error('Error fetching image:', error);
-    //     alert('An error occurred while fetching the image.');
-    //     } finally {
-    //     setIsImageLoading(false); // Set loading to false
-    //     }
-    // };
 
     const fetchImageForTypeAndDate = async (imageType) => {
         if (!selectedDate) {
@@ -153,17 +87,21 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
         }
       
         try {
-          setIsImageLoading(true);
-          const imageRequest = { date_of_interest: selectedDate };
-          const result =
-            imageType === 'sat'
-              ? await getImageForProject(authorization, userId, project.id, imageRequest)
-              : await getImageByTypeAndDate(authorization, userId, project.id, imageType, selectedDate);
+          setIsImageLoading(true); // Show loading indicator
+      
+          // Make the API call for the selected image type
+          const result = await getImageByTypeAndDate(
+            authorization,
+            userId,
+            project.id, // Always pass project ID
+            imageType,  // The selected button's image type (e.g., sat, ndvi)
+            selectedDate // The selected date
+          );
       
           if (result.status === 'success') {
-            const imageBlob = result.data;
-            const imageURL = URL.createObjectURL(imageBlob);
-            setFetchedImage(imageURL);
+            const imageBlob = result.data; // Get the image blob
+            const imageURL = URL.createObjectURL(imageBlob); // Convert to URL
+            setFetchedImage(imageURL); // Set the fetched image
           } else {
             alert(`Failed to fetch image: ${result.message}`);
           }
@@ -171,80 +109,9 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
           console.error('Error fetching image:', error);
           alert('An error occurred while fetching the image.');
         } finally {
-          setIsImageLoading(false);
+          setIsImageLoading(false); // Hide loading indicator
         }
       };
-      
-
-  // Handle downloading images
-//   const handleDownloadImages = () => {
-//     if (!startDate || !endDate) {
-//       alert('Please select both Start Date and End Date.');
-//       return;
-//     }
-    
-//     setIsRunning(true);
-//     setTimeout(() => {
-//       setIsRunning(false); // Simulate completion
-//     }, 3000);
-//   };
-// const handleDownloadImages = async () => {
-//     if (!startDate || !endDate) {
-//       alert('Please select both Start Date and End Date.');
-//       return;
-//     }
-  
-//     setIsRunning(true); // Show the running state
-  
-//     try {
-//       const dateRange = { start_date: startDate, end_date: endDate };
-//       const result = await downloadImagesForProject(
-//         authorization, 
-//         userId,        
-//         project.id,   
-//         dateRange,     
-//         project.aoi,
-//         planetKey    
-//       );
-  
-//       if (result.status === 'success') {
-//         alert(result.message); 
-//       } else {
-//         alert(result.message); 
-//       }
-//     } catch (error) {
-//       alert(`An error occurred: ${error.message}`);
-//     } finally {
-//       setIsRunning(false);
-//     }
-//   };
-
-// const pollDownloadStatus = async (authorization, userId, projectId, maxAttempts, pollInterval) => {
-//     let attempts = 0;
-  
-//     const poll = async (resolve, reject) => {
-//       attempts++;
-//       try {
-//         const statusResult = await getImageDownloadStatus(authorization, userId, projectId);
-  
-//         if (statusResult.status === 'success') {
-//           if (statusResult.data.status === 'finished') {
-//             resolve('Download process completed.');
-//           } else if (attempts < maxAttempts) {
-//             setTimeout(() => poll(resolve, reject), pollInterval);
-//           } else {
-//             reject('Polling timed out after 30 minutes. Please check again later.');
-//           }
-//         } else {
-//           reject(`Error checking status: ${statusResult.message}`);
-//         }
-//       } catch (error) {
-//         reject(`Error during polling: ${error.message}`);
-//       }
-//     };
-  
-//     return new Promise(poll);
-//   };
 
 const pollDownloadStatus = async (authorization, userId, projectId, maxAttempts, pollInterval) => {
     let attempts = 0;
@@ -273,43 +140,7 @@ const pollDownloadStatus = async (authorization, userId, projectId, maxAttempts,
   
     return new Promise(poll);
   };  
-
   
-// const handleDownloadImages = async () => {
-//     if (!startDate || !endDate) {
-//       alert('Please select both Start Date and End Date.');
-//       return;
-//     }
-  
-//     setIsRunning(true); // Show the running state immediately
-  
-//     try {
-//       const dateRange = { start_date: startDate, end_date: endDate };
-//       const result = await downloadImagesForProject(
-//         authorization,
-//         userId,
-//         project.id,
-//         dateRange,
-//         project.aoi,
-//         planetKey
-//       );
-  
-//       if (result.status === 'success') {
-//         alert(result.message);
-
-  
-//         // Keep "Status: Running..." enabled for now
-//         // Invoke Polling API
-//         // Update stuff accordingly
-//       } else {
-//         alert(result.message);
-//         setIsRunning(false); // If error occurs, allow interaction again
-//       }
-//     } catch (error) {
-//       alert(`An error occurred: ${error.message}`);
-//       setIsRunning(false); // If error occurs, allow interaction again
-//     }
-//   };  
 const handleDownloadImages = async () => {
     if (!startDate || !endDate) {
       alert('Please select both Start Date and End Date.');
@@ -354,26 +185,6 @@ const handleDownloadImages = async () => {
       setIsRunning(false); // If error occurs, allow interaction again
     }
   };
-  
-
-  // Render content based on the fetched image
-//   const renderContent = () => {
-//     if (fetchedImage) {
-//       return (
-//         <Box
-//           sx={{
-//             height: '300px',
-//             backgroundImage: `url(${fetchedImage})`,
-//             backgroundSize: 'cover',
-//             backgroundPosition: 'center',
-//             borderRadius: '10px',
-//           }
-//         />
-//       );
-//     }
-
-//     return <Box sx={{ height: '300px', backgroundColor: '#e0e0e0', textAlign: 'center', lineHeight: '300px', borderRadius: '10px' }}>No Image Available</Box>;
-//   };
 
 const renderContent = () => {
     if (isImageLoading) {
@@ -439,48 +250,6 @@ const renderContent = () => {
           marginBottom: '20px',
         }}
       >
-        {/* <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          <TextField
-            label="Start Date"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            disabled={isRunning} // Disable while running
-            sx={{ width: '200px' }}
-          />
-          <TextField
-            label="End Date"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            disabled={isRunning} // Disable while running
-            sx={{ width: '200px' }}
-          />
-        </Box>
-        <Box sx={{ textAlign: 'center', flex: 1, marginLeft: '20px', fontWeight: 'bold', color: '#666' }}>
-          {isRunning ? 'Status: Running...' : ''}
-        </Box>
-        <Button
-          onClick={handleDownloadImages}
-          disabled={isRunning} // Disable button while running
-          sx={{
-            textTransform: 'none',
-            color: 'white',
-            fontWeight: 'bold',
-            backgroundColor: isRunning ? '#B0BEC5' : '#007AFF', // Change color if disabled
-            padding: '10px 30px',
-            borderRadius: '10px',
-            '&:hover': {
-              backgroundColor: isRunning ? '#B0BEC5' : '#005BBB',
-            },
-          }}
-        >
-          Download New Images
-        </Button> 
-        </Box>
-        */}
         <Box sx={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
   <TextField
     label="Start Date"
@@ -525,83 +294,6 @@ const renderContent = () => {
       </Box>
 
       {/* Clickable Date Dropdown */}
-      {/* <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '10px 20px',
-          backgroundColor: '#f9f9f9',
-          borderRadius: '10px',
-          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-          marginBottom: '20px',
-        }}
-      >
-        <Typography
-          variant="h6"
-          onClick={(e) => setAnchorEl(e.currentTarget)}
-          sx={{
-            fontWeight: 'bold',
-            color: '#007AFF',
-            cursor: 'pointer',
-            '&:hover': { textDecoration: 'underline' },
-          }}
-        >
-          {selectedDate}
-        </Typography>
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-          sx={{
-            mt: 1,
-            '& .MuiPaper-root': {
-              borderRadius: '8px',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-            },
-          }}
-        >
-          {availableDates.map((date) => (
-            <MenuItem
-              key={date}
-              onClick={() => {
-                setSelectedDate(date);
-                setAnchorEl(null);
-              }}
-              sx={{
-                fontWeight: selectedDate === date ? 'bold' : 'normal',
-                color: selectedDate === date ? '#007AFF' : '#333',
-                '&:hover': {
-                  backgroundColor: '#f9f9f9',
-                },
-              }}
-            >
-              {date}
-            </MenuItem>
-          ))}
-        </Menu>
-        <Box sx={{ display: 'flex', gap: '10px' }}>
-          {['sat', 'sat_ndvi', 'sat_gci', 'ndvi', 'gci', 'yield'].map((label, index) => (
-            <Button
-              key={label}
-              onClick={() => fetchImageForTypeAndDate(label)}
-              sx={{
-                textTransform: 'none',
-                fontWeight: selectedButton === label ? 'bold' : 'normal',
-                color: selectedButton === label ? 'white' : '#007AFF',
-                backgroundColor: selectedButton === label ? '#007AFF' : 'transparent',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                '&:hover': {
-                  backgroundColor: selectedButton === label ? '#005BBB' : '#f2f2f2',
-                },
-              }}
-            >
-              {['Satellite Image', 'NDVI Heat Map', 'GCI Heat Map', 'NDVI Plot', 'GCI Plot', 'Yield Estimate'][index]}
-            </Button>
-          ))}
-        </Box>
-      </Box> */}
       <Box
   sx={{
     display: 'flex',
