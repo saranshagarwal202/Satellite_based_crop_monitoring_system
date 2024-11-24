@@ -93,16 +93,47 @@ const ProjectDetail = ({ projectData, userId, authorization }) => {
     };
 
   // Handle downloading images
-  const handleDownloadImages = () => {
+//   const handleDownloadImages = () => {
+//     if (!startDate || !endDate) {
+//       alert('Please select both Start Date and End Date.');
+//       return;
+//     }
+    
+//     setIsRunning(true);
+//     setTimeout(() => {
+//       setIsRunning(false); // Simulate completion
+//     }, 3000);
+//   };
+const handleDownloadImages = async () => {
     if (!startDate || !endDate) {
       alert('Please select both Start Date and End Date.');
       return;
     }
-    setIsRunning(true);
-    setTimeout(() => {
-      setIsRunning(false); // Simulate completion
-    }, 3000);
+  
+    setIsRunning(true); // Show the running state
+  
+    try {
+      const dateRange = { start_date: startDate, end_date: endDate };
+      const result = await downloadImagesForProject(
+        authorization, 
+        userId,        
+        project._id,   
+        dateRange,     
+        project.aoi    
+      );
+  
+      if (result.status === 'success') {
+        alert(result.message); 
+      } else {
+        alert(result.message); 
+      }
+    } catch (error) {
+      alert(`An error occurred: ${error.message}`);
+    } finally {
+      setIsRunning(false);
+    }
   };
+  
 
   // Render content based on the fetched image
 //   const renderContent = () => {
