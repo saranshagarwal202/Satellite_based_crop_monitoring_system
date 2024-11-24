@@ -41,13 +41,14 @@ function Login() {
   const handleLogin = async () => {
     try {
       const response = await login(email, password);
+      alert(`Response Data: ${JSON.stringify(response.data, null, 2)}`);
   
       if (response.status === 'success') {
         const { user, token, expires_in } = response.data;
   
         // Store token and user ID
         localStorage.setItem('authToken', token);
-        localStorage.setItem('userId', user); // Assuming `user.id` is the user ID
+        localStorage.setItem('userId', user); 
         alert('Login successful!');
   
         // Redirect to dashboard

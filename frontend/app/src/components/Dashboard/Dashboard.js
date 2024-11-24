@@ -177,6 +177,7 @@ const Dashboard = () => {
             projectData={selectedProject}
             userId={localStorage.getItem('userId')} // Pass userId
             authorization={localStorage.getItem('authToken')} // Pass authorization
+            planetKey={localStorage.getItem('PLANET_API_KEY')}
           />
           ) : (
             <h1>Select a project to view details</h1>

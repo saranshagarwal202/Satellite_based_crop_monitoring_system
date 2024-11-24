@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Typography, Button, Box, TextField, Menu, MenuItem } from '@mui/material';
 import { downloadImagesForProject, getImageForProject } from '../../services/projectservice';
 
-const ProjectDetail = ({ projectData, userId, authorization }) => {
+const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
   const [selectedButton, setSelectedButton] = useState('Satellite Image');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -123,7 +123,8 @@ const handleDownloadImages = async () => {
         userId,        
         project.id,   
         dateRange,     
-        project.aoi    
+        project.aoi,
+        planetKey    
       );
   
       if (result.status === 'success') {

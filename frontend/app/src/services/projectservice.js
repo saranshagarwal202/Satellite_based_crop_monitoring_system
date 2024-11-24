@@ -82,7 +82,7 @@ export const downloadProjectImages = async (authorization, userId, projectId, da
 };
 
 
-export const getImageForProject = async (authorization, userId, projectId, imageRequest) => {
+export const getImageForProject = async (authorization, userId, projectId, imageRequest, planetKey) => {
   try {
     const response = await jobRunnerInstance.post(
       `/api/external/projects/${projectId}/image`, 
@@ -93,6 +93,7 @@ export const getImageForProject = async (authorization, userId, projectId, image
         headers: {
           authorization,
           user_id: userId,
+          PLANET_API_KEY: planetKey,
         },
       }
     );
