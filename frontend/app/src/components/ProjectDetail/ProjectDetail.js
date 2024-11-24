@@ -32,15 +32,15 @@ const ProjectDetail = ({ projectData, userId, authorization }) => {
     setSelectedDate(dates[0] || ''); // Set first date as default
   }, [project.images]);
 
-  useEffect(() => {
-    if (projectData) {
-      alert(`$$$$$ Project Data: ${JSON.stringify(projectData, null, 2)}`);
-    }
-  }, [projectData]);
+//   useEffect(() => {
+//     if (projectData) {
+//       alert(`$$$$$ Project Data: ${JSON.stringify(projectData, null, 2)}`);
+//     }
+//   }, [projectData]);
 
-  useEffect(() => {
-    alert(`Authorization: ${authorization}, User ID: ${userId}, Project ID: ${projectData?.id}`);
-  }, [authorization, userId, projectData]);
+//   useEffect(() => {
+//     alert(`Authorization: ${authorization}, User ID: ${userId}, Project ID: ${projectData?.id}`);
+//   }, [authorization, userId, projectData]);
 
   // Handle fetching images for specific image type and date
 //   const fetchImageForTypeAndDate = async (imageType) => {
