@@ -143,6 +143,9 @@ export const getImageByTypeAndDate = async (authorization, userId, projectId, im
 };
 
 export const downloadImagesForProject = async (authorization, userId, projectId, dateRange, aoi) => {
+  alert(
+    `IN request\nAuth: ${authorization}\nUserId: ${userId}\nProjID: ${projectId}\nDate Range: ${JSON.stringify(dateRange)}\nAOI: ${JSON.stringify(aoi)}`
+  );
   try {
     const response = await jobRunnerInstance.post(
       `/api/external/projects/${projectId}/download_images`,

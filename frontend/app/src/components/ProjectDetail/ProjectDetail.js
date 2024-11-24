@@ -38,9 +38,9 @@ const ProjectDetail = ({ projectData, userId, authorization }) => {
     }
   }, [projectData]);
 
-//   useEffect(() => {
-//     alert(`Authorization: ${authorization}, User ID: ${userId}, Project ID: ${projectData?.id}`);
-//   }, [authorization, userId, projectData]);
+  useEffect(() => {
+    alert(`Authorization: ${authorization}, User ID: ${userId}, Project ID: ${projectData?.id}`);
+  }, [authorization, userId, projectData]);
 
   // Handle fetching images for specific image type and date
 //   const fetchImageForTypeAndDate = async (imageType) => {
@@ -79,7 +79,7 @@ const ProjectDetail = ({ projectData, userId, authorization }) => {
         const imageRequest = {
             date_of_interest: selectedDate,
         };
-        const result = await getImageForProject(authorization, userId, project._id, imageRequest);
+        const result = await getImageForProject(authorization, userId, project.id, imageRequest);
     
         if (result.status === 'success') {
             const imageBlob = result.data;
@@ -121,7 +121,7 @@ const handleDownloadImages = async () => {
       const result = await downloadImagesForProject(
         authorization, 
         userId,        
-        project._id,   
+        project.id,   
         dateRange,     
         project.aoi    
       );
