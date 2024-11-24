@@ -105,7 +105,7 @@ async def verify_user(request: Request):
         user_data = await request.json()
         user = db.users.find_one({"email": user_data["email"], "password": user_data["password"]})
         if user:
-            return JSONResponse(status_code=200, content={"_id": str(user["_id"]), "email": user["email"], "name": user["name"]})
+            return JSONResponse(status_code=200, content={"_id": str(user["_id"]), "email": user["email"], "name": user["name"], "PLANET_API_KEY": user["PLANET_API_KEY"]})
         else:
             return Response(status_code=404, content="User not found")
     except Exception as e:
@@ -143,7 +143,8 @@ async def add_project(request: Request):
             "user_id": user_id,
             "images": [],
             "ndvi": [],
-            "gci": []
+            "gci": [],
+            "status": "finished"
         }
         
         already_exist = db.projects.find_one({"user_id": user_id, "farm_name": project_data["farm_name"]})
@@ -163,6 +164,38 @@ async def add_project(request: Request):
     except Exception as e:
         logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Project addition failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+@app.post("/api/internal/data_manager/project/status", status_code=200)
+async def modify_status(request: Request):
+    try:
+        data = await request.json()
+        user_id = request.headers.get("user_id")
+        
+        db.projects.update_one(
+            {"_id": ObjectId(request.headers["project_id"])},
+            {"$set": {"status": data["status"]}}
+        )
+        
+        logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Status Modified")
+        return Response(content="Status modified", status_code=200)
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Project addition failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+@app.get("/api/internal/data_manager/project/status", status_code=200)
+async def retrive_status(request: Request):
+    try:
+        data = await request.json()
+        user_id = request.headers.get("user_id")
+        
+        status = db.projects.find_one({"_id": ObjectId(request.headers['project_id'])})['status']
+        
+        logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Status Modified")
+        return JSONResponse(status_code=200, content={"status": status})
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Project addition failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
 
 @app.post("/api/internal/data_manager/image/get", status_code=200)
 async def get_image(request: Request):

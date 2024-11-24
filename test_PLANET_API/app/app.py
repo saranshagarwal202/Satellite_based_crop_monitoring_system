@@ -28,8 +28,8 @@ async def assets(request: Request, image_id):
         f = open("app/assets-response-active.json", 'r')
         response_data = loads(f.read())
         f.close()
-        response_data['ortho_visual']['_links']['activate'] = 'http://test_planet_api:4999/data/v1/assets/eyJpIjogIjIwMjMwNTE3XzE2MTIxOV8yNV8yNDMwIiwgImMiOiAiUFNTY2VuZSIsICJ0IjogIm9ydGhvX3Zpc3VhbCIsICJjdCI6ICJpdGVtLXR5cGUifQ/activate'
-        response_data['ortho_visual']['location'] = 'http://test_planet_api:4999/data/v1/download?token=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWN4ekNTUmRSem01UERZMWxvSUZFY010bjR5LXVUdVBCSVd5N2dad2pYT3gtVVR4RHluc2hMVENNVmJHMTdUQ1EwXzA0Mnhjb1RGQmkwU2FfYnJBZz09IiwiZXhwIjoxNzI4MDAxMDMxLCJ0b2tlbl90eXBlIjoidHlwZWQtaXRlbSIsIml0ZW1fdHlwZV9pZCI6IlBTU2NlbmUiLCJpdGVtX2lkIjoiMjAyMzA1MTdfMTYxMjE5XzI1XzI0MzAiLCJhc3NldF90eXBlIjoib3J0aG9fdmlzdWFsIn0.sqe0hcBqTKSdU-9Zna39Wpo4emuu8vnJaWE4gTS0RElDKOR9H73lb0SX5IjGZB1PiIcTFgyqiaTobGUPa14kJQ'
+        response_data['ortho_visual']['_links']['activate'] = 'http://planet_api:4999/data/v1/assets/eyJpIjogIjIwMjMwNTE3XzE2MTIxOV8yNV8yNDMwIiwgImMiOiAiUFNTY2VuZSIsICJ0IjogIm9ydGhvX3Zpc3VhbCIsICJjdCI6ICJpdGVtLXR5cGUifQ/activate'
+        response_data['ortho_visual']['location'] = 'http://planet_api:4999/data/v1/download?token=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWN4ekNTUmRSem01UERZMWxvSUZFY010bjR5LXVUdVBCSVd5N2dad2pYT3gtVVR4RHluc2hMVENNVmJHMTdUQ1EwXzA0Mnhjb1RGQmkwU2FfYnJBZz09IiwiZXhwIjoxNzI4MDAxMDMxLCJ0b2tlbl90eXBlIjoidHlwZWQtaXRlbSIsIml0ZW1fdHlwZV9pZCI6IlBTU2NlbmUiLCJpdGVtX2lkIjoiMjAyMzA1MTdfMTYxMjE5XzI1XzI0MzAiLCJhc3NldF90eXBlIjoib3J0aG9fdmlzdWFsIn0.sqe0hcBqTKSdU-9Zna39Wpo4emuu8vnJaWE4gTS0RElDKOR9H73lb0SX5IjGZB1PiIcTFgyqiaTobGUPa14kJQ'
         
         return Response(status_code=200, content=dumps(response_data))
     except Exception as e:

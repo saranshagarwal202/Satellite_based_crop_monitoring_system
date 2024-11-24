@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Response, Request, Header, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
@@ -90,7 +91,8 @@ async def login(request: Request, login_data: LoginRequest):
             return Response(content=dumps({
                 "user": user_data["_id"],
                 "token": token,
-                "expires_in": expires_in
+                "expires_in": expires_in,
+                "PLANET_API_KEY": user_data["PLANET_API_KEY"]
             }), status_code=200)
         else:
             logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - User does not exist")
@@ -171,7 +173,7 @@ async def get_image(request: Request,  image_type: str, authorization: str = Hea
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
 @app.get("/api/external/projects/{project_id}/download_images/status", status_code=200)
-async def get_image(request: Request,  project_id: str, authorization: str = Header(None)):
+async def get_status(request: Request,  project_id: str, authorization: str = Header(None)):
     try:
         logger = getLogger()
         verify_token(authorization, request.headers['user_id'])
@@ -179,16 +181,16 @@ async def get_image(request: Request,  project_id: str, authorization: str = Hea
         data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager/project/status"
 
         async with httpx.AsyncClient() as client:
-            response = await client.post(data_manager_url, json={"status": "running"}, headers={"user_id": request.headers['user_id'], 
+            response = await client.get(data_manager_url, headers={"user_id": request.headers['user_id'], 
                                                                              "project_id": project_id})
         if response.status_code == 200:
-            logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Image retrieved successfully")
-            return Response(content=response.content, status_code=200)
+            logger.info(f"200 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - status retrieved successfully")
+            return JSONResponse(status_code=200, content={"status": response.json()['status']})
         else:
-            logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Failed to retrieve image")
-            return Response(content="Failed to retrieve image", status_code=400)
+            logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Failed to retrieve status")
+            return Response(content="Failed to retrieve status", status_code=400)
     except Exception as e:
-        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Get image failed. {e.__class__.__name__}: {str(e)}")
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - Get status failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
 
@@ -202,16 +204,18 @@ async def download_images(request: Request,  project_id: str, authorization: str
         data_fetcher_url = f"{environ['DATAFETCHER_URL']}/api/internal/data_fetcher/download"
         data = await request.json()
         config = {
-            "start_date": data["date_of_interest"],
-            "end_date": data["date_of_interest"],
+            "start_date": data["start_date"],
+            "end_date": data["end_date"],
             "project_id": project_id,
             "aoi": data["aoi"],
-            "user_id": data.headers['user_id'],
+            "user_id": request.headers['user_id'],
             "job_id": project_id,
+            "PLANET_API_KEY": data["PLANET_API_KEY"]
         }
         async with httpx.AsyncClient() as client:
             response = await client.post(data_fetcher_url, json=config, headers={"user_id": request.headers['user_id']})
 
+        response.raise_for_status()
         data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager/project/status"
 
         async with httpx.AsyncClient() as client:

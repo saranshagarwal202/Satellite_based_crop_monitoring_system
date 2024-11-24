@@ -166,3 +166,4 @@ app/test.ipynb
 test/*.tif
 .vscode/
 local_save/
+app/random_forest_model.joblib
