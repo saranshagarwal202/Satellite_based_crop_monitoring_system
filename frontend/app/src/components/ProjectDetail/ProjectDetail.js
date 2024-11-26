@@ -82,7 +82,7 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
 
     const fetchImageForTypeAndDate = async (imageType) => {
         if (!selectedDate) {
-          alert('Please select a valid date.');
+          // Debug this later: alert('Please select a valid date.');
           return;
         }
       
@@ -103,7 +103,7 @@ const ProjectDetail = ({ projectData, userId, authorization, planetKey}) => {
             const imageURL = URL.createObjectURL(imageBlob); // Convert to URL
             setFetchedImage(imageURL); // Set the fetched image
           } else {
-            alert(`Failed to fetch image: ${result.message}`);
+            // debug this later: alert(`Failed to fetch image: ${result.message}`);
           }
         } catch (error) {
           console.error('Error fetching image:', error);
@@ -161,7 +161,7 @@ const handleDownloadImages = async () => {
       );
   
       if (result.status === 'success') {
-        alert(result.message);
+        // alert(result.message);
   
         // Start polling for status
         const pollInterval = 30000; // Poll every 30 seconds
@@ -169,19 +169,19 @@ const handleDownloadImages = async () => {
   
         try {
           const statusMessage = await pollDownloadStatus(authorization, userId, project.id, maxAttempts, pollInterval);
-          alert(statusMessage);
+          // alert(statusMessage);
           setIsRunning(false);
           // Reload or update project data here if necessary
         } catch (error) {
-          alert(error);
+          // alert(error);
           setIsRunning(false);
         }
       } else {
-        alert(result.message);
+        // alert(result.message);
         setIsRunning(false); // If error occurs, allow interaction again
       }
     } catch (error) {
-      alert(`An error occurred: ${error.message}`);
+      // alert(`An error occurred: ${error.message}`);
       setIsRunning(false); // If error occurs, allow interaction again
     }
   };

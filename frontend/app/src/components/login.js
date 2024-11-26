@@ -41,14 +41,16 @@ function Login() {
   const handleLogin = async () => {
     try {
       const response = await login(email, password);
-      alert(`Response Data: ${JSON.stringify(response.data, null, 2)}`);
+      // alert(`Response Data: ${JSON.stringify(response.data, null, 2)}`);
   
       if (response.status === 'success') {
-        const { user, token, expires_in } = response.data;
+        const { user, user_name, token, expires_in, PLANET_API_KEY } = response.data;
   
         // Store token and user ID
         localStorage.setItem('authToken', token);
         localStorage.setItem('userId', user); 
+        // localStorage.setItem('user_name', user_name); 
+        // localStorage.setItem('PLANET_API_KEY', PLANET_API_KEY)
         alert('Login successful!');
   
         // Redirect to dashboard

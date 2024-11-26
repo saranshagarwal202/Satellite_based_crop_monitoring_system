@@ -19,7 +19,7 @@ const CreateProject = () => {
   const handleAoiSubmit = (geoJson) => {
     setAoi(geoJson);
     setStep(step + 1); // Go to the next step
-    alert('got aoi')
+    // alert('got aoi')
   };
 
   // const handleSubmit = () => {

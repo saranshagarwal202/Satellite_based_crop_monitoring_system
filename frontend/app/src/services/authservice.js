@@ -14,6 +14,7 @@ export const signUp = async (username, password, email, planetApiKey) => {
       name: username,
       PLANET_API_KEY: planetApiKey,
     });
+    // alert(`planet: ${planetApiKey}`)
     return { status: 'success', data: response.data };
   } catch (error) {
     return {

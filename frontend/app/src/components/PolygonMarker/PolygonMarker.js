@@ -47,7 +47,7 @@ function PolygonMarker({ onAoiSubmit }) {
   
       // Enable the freeze button
       console.log('GeoJSON Data:', geoJson);
-      alert(JSON.stringify(geoJson, null, 2)); // Optional debug
+      // alert(JSON.stringify(geoJson, null, 2)); // Optional debug
     } else {
       console.warn('No layer created.');
     }

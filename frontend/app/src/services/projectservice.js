@@ -147,6 +147,7 @@ export const downloadImagesForProject = async (authorization, userId, projectId,
   //   `IN request\nAuth: ${authorization}\nUserId: ${userId}\nProjID: ${projectId}\nDate Range: ${JSON.stringify(dateRange)}\nAOI: ${JSON.stringify(aoi)}`
   // );
   try {
+    // alert(`planet in download imgs: ${planetKey}`)
     const response = await jobRunnerInstance.post(
       `/api/external/projects/${projectId}/download_images`,
       {
