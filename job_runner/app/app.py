@@ -200,7 +200,9 @@ async def download_images(request: Request,  project_id: str, authorization: str
     try:
         logger = getLogger()
         verify_token(authorization, request.headers['user_id'])
-        
+        data_manager_url = f"{environ['DATAMANAGER_URL']}/api/internal/data_manager/user/planet_key"
+        async with httpx.AsyncClient() as client:
+            response = await client.post(data_manager_url, json={'user_id': request.headers['user_id']})
         
         data_fetcher_url = f"{environ['DATAFETCHER_URL']}/api/internal/data_fetcher/download"
         data = await request.json()
@@ -211,7 +213,7 @@ async def download_images(request: Request,  project_id: str, authorization: str
             "aoi": data["aoi"],
             "user_id": request.headers['user_id'],
             "job_id": project_id,
-            "PLANET_API_KEY": data["PLANET_API_KEY"]
+            "PLANET_API_KEY": response.json()["PLANET_API_KEY"]
         }
         async with httpx.AsyncClient() as client:
             response = await client.post(data_fetcher_url, json=config, headers={"user_id": request.headers['user_id']})

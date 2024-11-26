@@ -27,7 +27,8 @@ services:
         container_name: data_fetcher
         environment:
             - DATAMANAGER_URL=http://data_manager:5001
-            - PLANET_API_URL=http://planet_api:4999
+            # - PLANET_API_URL=http://planet_api:4999
+            - PLANET_API_URL=https://api.planet.com
         networks:
             - job_runner_network
         volumes:

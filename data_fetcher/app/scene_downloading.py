@@ -7,6 +7,8 @@ import time
 import os
 from queue import Queue
 from logging import getLogger
+from datetime import datetime, timedelta
+
 PLANET_API_KEY = None
 PLANET_API_URL = os.environ.get("PLANET_API_URL")
 logger = getLogger()
@@ -196,7 +198,23 @@ def download_scenes_to_queue(
         globals()["PLANET_API_KEY"] = os.getenv("PLANET_API_KEY")
     else:
         globals()["PLANET_API_KEY"] = api_key
-    image_ids = _search_for_scenes_(job_id, start_date, end_date, aoi_polygon)
+    
+    start_date = datetime.strptime(start_date, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date, "%Y-%m-%d")
+    delta = timedelta(days=7)
+    curr = start_date
+    dates = []
+    while curr<=end_date:
+        dates.append((curr.strftime("%Y-%m-%d"), (curr+timedelta(days=6)).strftime("%Y-%m-%d")))
+        curr = curr+delta
+        # print(curr.strftime("%Y-%m-%d"))
+    image_ids = []
+    for st, ed in dates:
+        ops = _search_for_scenes_(job_id, st, ed, aoi_polygon)
+        if len(ops)!=0:
+            image_ids.append(ops[0])
+
+
     if len(image_ids) > 0:
         task_completion_status = _run_scene_downloader_(
             job_id, image_ids, image_queue)

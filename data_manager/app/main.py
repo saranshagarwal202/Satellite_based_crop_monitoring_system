@@ -113,6 +113,20 @@ async def verify_user(request: Request):
         logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - User verification failed. {e.__class__.__name__}: {str(e)}")
         return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
 
+@app.post("/api/internal/data_manager/user/planet_key", status_code=200)
+async def verify_user(request: Request):
+    try:
+        user_data = await request.json()
+        user = db.users.find_one({"_id": ObjectId(user_data["user_id"])})
+        if user:
+            return JSONResponse(status_code=200, content={"_id": str(user["_id"]), "email": user["email"], "name": user["name"], "PLANET_API_KEY": user["PLANET_API_KEY"]})
+        else:
+            return Response(status_code=404, content="User not found")
+    except Exception as e:
+        logger.error(f"400 {request.method} {request.url.path} {request.url.hostname} {request.headers['user-agent']} - User verification failed. {e.__class__.__name__}: {str(e)}")
+        return Response(content=dumps({"error_code": 400, "error": f"{e.__class__.__name__}: {str(e)}"}), status_code=400)
+
+
 @app.get("/api/internal/data_manager/project/get", status_code=200)
 async def get_projects(request: Request):
     try:
