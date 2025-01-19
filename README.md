@@ -13,7 +13,7 @@ SCMS implements a modern microservices architecture where each component is cont
 - **Maintainability**: Modular design enables independent updates and improvements to services
 - **Future-Proof**: New capabilities can be easily integrated by adding new containers without restructuring the existing system
 
-<img src="./system_design.png" alt="System Architecture" width="800" style="display: block; margin: auto;">
+<img src="./system_design.png" alt="System Architecture" width="500" style="display: block; margin: auto;">
 
 ## Features
 
@@ -27,8 +27,8 @@ SCMS implements a modern microservices architecture where each component is cont
 ## Demo
 
 Check out our system demo:
-![Watch the video]
-(https://raw.githubusercontent.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4)
+
+![Watch the video](https://raw.githubusercontent.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4)
 
 ## System Architecture
 
