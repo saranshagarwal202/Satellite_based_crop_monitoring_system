@@ -27,8 +27,7 @@ SCMS implements a modern microservices architecture where each component is cont
 ## Demo
 
 Check out our system demo:
-
-![Watch the video](https://raw.githubusercontent.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4)
+[![Watch the video](https://raw.githubusercontent.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/thumbnail.jpg)](https://raw.githubusercontent.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4)
 
 ## System Architecture
 
