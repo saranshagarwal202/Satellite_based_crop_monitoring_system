@@ -1,48 +1,80 @@
-# cotton_yield_prediction
+# Satellite-Based Crop Monitoring System (SCMS)
 
-## Introduction
+SCMS is a powerful web-based application that enables farmers and agricultural researchers to monitor crop health and predict yields using satellite imagery. The system provides real-time insights through vegetation indices and machine learning models, helping users make informed decisions about crop management.
 
-This project focuses on the development of a website designed to empower farmers with data-driven insights into their cotton yield. By leveraging the power of machine learning (ML) and satellite imagery, users can gain valuable predictions about their harvests.
+![System Architecture](./system_design.png)
 
-**Functionality:**
+## Features
 
-1. **Interactive Farm Marking:** Users can conveniently mark the location of their farm directly on a map.
-2. **Satellite Image Retrieval:** The backend seamlessly retrieves historical satellite images specific to the marked farm location.
-3. **ML-Powered Yield Prediction:** A robust ML pipeline analyzes the retrieved satellite imagery, ultimately generating a predicted cotton yield for the farm.
+- **Real-time Crop Monitoring**: Track crop health using high-resolution satellite imagery
+- **Vegetation Analysis**: Automated calculation of NDVI (Normalized Difference Vegetation Index) and GCI (Green Chlorophyll Index)
+- **Yield Prediction**: Advanced machine learning models for accurate crop yield forecasting
+- **Disease Detection**: Early identification of potential crop diseases through heat map visualization
+- **Multi-Farm Management**: Efficiently manage and monitor multiple farming areas
+- **Interactive Interface**: User-friendly web interface for marking Areas of Interest (AOI) and analyzing data
 
-**Microservice Architecture:**
+## Demo
 
-The project adopts a microservice architecture for enhanced maintainability and scalability. Each essential functionality resides within a dedicated folder:
+Check out our system demo:
 
-- **data_manager:** Efficiently handles data storage and retrieval tasks.
-- **data_fetcher:** Meticulously fetches relevant historical satellite images.
-- **ml_analytics:** Encompasses the core ML model for analyzing imagery and predicting yield.
-- **job_runner:** Orchestrates the execution of the entire workflow, ensuring seamless operation.
+https://github.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4
 
-## Maintenance
+## System Architecture
 
-**Branching Strategy:**
+SCMS employs a microservice architecture with Docker containerization, ensuring scalability and maintainability. Each microservice is responsible for specific functionalities:
 
-* **dev branches:** These branches are used for active development. Each microservice will have its own dev branch, e.g., `dev_data_fetcher` for the `data_fetcher` microservice.
-* **main branch:** This branch represents the stable state of the codebase. Only merged and tested code from dev branches should be merged into the main branch.
+- **Frontend**: React.js based user interface
+- **Job Runner**: Orchestrates backend operations and handles authentication
+- **Data Fetcher/Processor**: Manages satellite imagery retrieval and preprocessing
+- **Data Manager**: Handles data storage and retrieval operations
+- **ML/Analytics**: Performs advanced analytics and yield predictions
+- **test_PLANET_API**: Mock server for Planet API (development and testing)
 
-**Code Review and Merging:**
+## Technical Details
 
-* Before merging any code into the main branch, ensure it has been thoroughly reviewed by at least one other team member.
-* Use a pull request or merge request process to facilitate code review and discussion.
+### Core Technologies
+- Frontend: React.js
+- Backend: Microservices architecture with Docker
+- Database: MongoDB for metadata, SFTP for image storage
+- Machine Learning: Random Forest models for yield prediction
+- API: REST-based communication between services
 
-**Testing:**
+### Performance Metrics
+- Yield Prediction Model Performance on Cotton Crop:
+  - MAE: 3.66
+  - RMSE: 5.55
+  - R² Score: 0.81
 
-* Implement a comprehensive testing strategy, including unit tests, integration tests, and end-to-end tests.
-* Regularly run tests to catch and fix issues early in the development process.
+## Directory Structure
 
-**Documentation:**
+```
+SCMS/
+├── frontend/              # React.js frontend application
+├── job_runner/           # Task orchestration service
+├── data_fetcher/         # Satellite data acquisition service
+├── data_manager/         # Data storage and retrieval service
+├── ml_analytics/         # Machine learning and analytics service
+├── test_PLANET_API/      # Mock Planet API server for testing
+├── demo.mp4              # System demonstration video
+├── architecture.jpeg     # System architecture diagram
+└── README.md            # Project documentation
+```
 
-* Maintain clear and up-to-date documentation for all components of the project.
-* Include instructions for setting up the development environment, running the project, and contributing to the codebase.
+## Getting Started
 
+1. Clone the repository:
+```bash
+git clone https://github.com/saranshagarwal202/Satellite_based_crop_monitoring_system.git
+cd SCMS
+```
 
-**Code Quality:**
+2. Start the services using Docker Compose:
+```bash
+docker-compose up
+```
 
-* Adhere to coding standards and conventions to ensure code readability and maintainability.
-* Use tools like linters and formatters to automatically enforce coding standards.
+3. Access the application at `http://localhost:3000`
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.
