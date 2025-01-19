@@ -2,7 +2,18 @@
 
 SCMS is a powerful web-based application that enables farmers and agricultural researchers to monitor crop health and predict yields using satellite imagery. The system provides real-time insights through vegetation indices and machine learning models, helping users make informed decisions about crop management.
 
-![System Architecture](./system_design.png)
+## System Architecture Overview
+
+SCMS implements a modern microservices architecture where each component is containerized using Docker, enabling modular development and deployment. The system is designed with security, scalability, and maintainability in mind. The frontend communicates exclusively with the Job Runner service, which acts as an orchestrator for all backend operations. This design ensures that internal APIs remain private and secure, while the Job Runner manages authentication and coordinates tasks across other services.
+
+### Key Architectural Benefits
+- **Enhanced Security**: Internal APIs are not publicly exposed, reducing attack surfaces and ensuring data protection
+- **Scalability**: Each service can be scaled independently based on demand
+- **Flexibility**: Docker containerization allows deployment across various cloud platforms (AWS, Azure, GCP) with minimal modifications
+- **Maintainability**: Modular design enables independent updates and improvements to services
+- **Future-Proof**: New capabilities can be easily integrated by adding new containers without restructuring the existing system
+
+<img src="./system_design.png" alt="System Architecture" width="800" style="display: block; margin: auto;">
 
 ## Features
 
@@ -16,8 +27,8 @@ SCMS is a powerful web-based application that enables farmers and agricultural r
 ## Demo
 
 Check out our system demo:
-
-https://github.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4
+![Watch the video]
+(https://raw.githubusercontent.com/saranshagarwal202/Satellite_based_crop_monitoring_system/main/demo.mp4)
 
 ## System Architecture
 
